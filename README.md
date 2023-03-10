@@ -14,6 +14,8 @@ Test the  wifi transmission between two RPIs
 ## LoRa
 Test the  wifi transmission between two RPIs
 
+lora module from https://github.com/raspberrypi-tw/lora-sx1276
+
   cd lora-sx1276/02-p2p
 
 ### Receiver
