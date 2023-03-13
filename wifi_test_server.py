@@ -10,4 +10,7 @@ if __name__ == '__main__':
     output_file = open("wifi_test_server.log", "w")
     
     
+    output_file.close()
+    
+    
     
