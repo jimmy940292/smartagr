@@ -1,6 +1,6 @@
 # smartagr
 
-## Wi-FI
+## Wi-F
 Test the  wifi transmission between two RPIs
 
 ### Receiver
