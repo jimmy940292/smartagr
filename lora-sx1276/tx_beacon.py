@@ -103,7 +103,7 @@ args = parser.parse_args(lora)
 
 lora.set_pa_config(pa_select=1)
 #lora.set_rx_crc(True)
-#lora.set_agc_auto_on(True)
+# lora.set_agc_auto_on(True)
 #lora.set_lna_gain(GAIN.NOT_USED)
 #lora.set_coding_rate(CODING_RATE.CR4_6)
 #lora.set_implicit_header_mode(False)

@@ -108,7 +108,8 @@ class LoRaSocket(LoRa):
 
 if __name__ == '__main__':
     
-    server = Server('localhost', 20000)
+    # server = Server('localhost', 20000)
+    server = Server("10.0.0.6", 20000)
     
     lora = LoRaSocket(verbose=False)
 

@@ -46,33 +46,50 @@ class LoRaBeacon(LoRa):
         super(LoRaBeacon, self).__init__(verbose)
         self.set_mode(MODE.SLEEP)
         self.set_dio_mapping([1,0,0,0,0,0])
+        
+    def send_packet(self, packet):
+        self.set_mode(MODE.STDBY)
+        print("Send: {}".format(packet))
+        data = [int(hex(ord(c)), 0) for c in packet]
+        
+        data = list([0x00]*255)
+        self.write_payload(data)
+        self.set_mode(MODE.TX)
 
     def on_rx_done(self):
+        # BOARD.led_on()
         print("\nRxDone")
-        print(self.get_irq_flags())
-        print(map(hex, self.read_payload(nocheck=True)))
-        self.set_mode(MODE.SLEEP)
-        self.reset_ptr_rx()
-        self.set_mode(MODE.RXCONT)
+        self.clear_irq_flags(RxDone=1)
+        payload = self.read_payload(nocheck=True)
+        data = ''.join([chr(c) for c in payload])
+        print("Packet: {}".format(data))
+        print("RSSI: {}".format(self.get_rssi_value()))
+        print("SNR: {}".format(self.get_pkt_snr_value()))
+        print()
+        
+        
+        self.end()
+                
+        # Change to TX
+        # BOARD.led_off()
+        # self.set_dio_mapping([1,0,0,0,0,0])    # TX
+        # self.set_mode(MODE.STDBY)
+        # sleep(5)
+        # self.clear_irq_flags(TxDone=1)
+        # data = "ABCD"
+        # self.send_packet(data)
 
     def on_tx_done(self):
-        global args
-        self.set_mode(MODE.STDBY)
-        self.clear_irq_flags(TxDone=1)
-        sys.stdout.flush()
-        self.tx_counter += 1
-        sys.stdout.write("\rtx #%d" % self.tx_counter)
-        if args.single:
-            print
-            sys.exit(0)
-        BOARD.led_off()
-        sleep(args.wait)
-        rawinput = input(">>> ")
-        data = [int(hex(ord(c)), 0) for c in rawinput]
-        #self.write_payload([0x0f])
-        self.write_payload(data)
-        BOARD.led_on()
-        self.set_mode(MODE.TX)
+        # global args
+        print("\nTxDone")
+        # Change to RX
+        self.set_dio_mapping([0,0,0,0,0,0])    # RX
+        sleep(0.01)
+        self.reset_ptr_rx()
+        self.set_mode(MODE.RXCONT)
+        self.clear_irq_flags(RxDone=1)
+        
+        
 
     def on_cad_done(self):
         print("\non_CadDone")
@@ -96,50 +113,64 @@ class LoRaBeacon(LoRa):
 
     def start(self):
         global args
-        sys.stdout.write("\rstart")
         self.tx_counter = 0
-        BOARD.led_on()
-        self.write_payload([0x0f])
-        #self.write_payload([0x0f, 0x65, 0x6c, 0x70])
-        self.set_mode(MODE.TX)
+        # BOARD.led_on()
+        # self.write_payload([0x0f])
+        data = "ABCD"
+        self.send_packet(data)
         while True:
-            sleep(1)
-
-lora = LoRaBeacon(verbose=False)
-args = parser.parse_args(lora)
-
-lora.set_pa_config(pa_select=1)
-#lora.set_rx_crc(True)
-#lora.set_agc_auto_on(True)
-#lora.set_lna_gain(GAIN.NOT_USED)
-#lora.set_coding_rate(CODING_RATE.CR4_6)
-#lora.set_implicit_header_mode(False)
-#lora.set_pa_config(max_power=0x04, output_power=0x0F)
-#lora.set_pa_config(max_power=0x04, output_power=0b01000000)
-#lora.set_low_data_rate_optim(True)
-#lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
+            sleep(0.01)
+    def end(self):
+        sys.stdout.flush()
+        self.set_mode(MODE.SLEEP)
+        print("Receive ACK")
+        BOARD.teardown()
+        exit()
+        
 
 
-print(lora)
-#assert(lora.get_lna()['lna_gain'] == GAIN.NOT_USED)
-assert(lora.get_agc_auto_on() == 1)
+if __name__ == "__main__":
+    
 
-print("Beacon config:")
-print("  Wait %f s" % args.wait)
-print("  Single tx = %s" % args.single)
-print("")
-try: input("Press enter to start...")
-except: pass
+    lora = LoRaBeacon(verbose=False)
+    args = parser.parse_args(lora)
 
-try:
+    # Setting
+    lora.set_pa_config(pa_select=1)
+    #lora.set_rx_crc(True)
+    #lora.set_agc_auto_on(True)
+    #lora.set_lna_gain(GAIN.NOT_USED)
+    #lora.set_coding_rate(CODING_RATE.CR4_6)
+    #lora.set_implicit_header_mode(False)
+    #lora.set_pa_config(max_power=0x04, output_power=0x0F)
+    #lora.set_pa_config(max_power=0x04, output_power=0b01000000)
+    #lora.set_low_data_rate_optim(True)
+    #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
+    
+    # Start
     lora.start()
-except KeyboardInterrupt:
-    sys.stdout.flush()
-    print("")
-    sys.stderr.write("KeyboardInterrupt\n")
-finally:
-    sys.stdout.flush()
-    print("")
-    lora.set_mode(MODE.SLEEP)
-    print(lora)
-    BOARD.teardown()
+
+
+# print(lora)
+# #assert(lora.get_lna()['lna_gain'] == GAIN.NOT_USED)
+# assert(lora.get_agc_auto_on() == 1)
+
+# print("Beacon config:")
+# print("  Wait %f s" % args.wait)
+# print("  Single tx = %s" % args.single)
+# print("")
+# try: input("Press enter to start...")
+# except: pass
+
+# try:
+#     lora.start()
+# except KeyboardInterrupt:
+#     sys.stdout.flush()
+#     # print("")
+#     sys.stderr.write("KeyboardInterrupt\n")
+# finally:
+#     sys.stdout.flush()
+#     # print("")
+#     lora.set_mode(MODE.SLEEP)
+#     # print(lora)
+#     BOARD.teardown()
