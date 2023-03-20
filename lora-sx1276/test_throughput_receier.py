@@ -26,6 +26,7 @@
 
 import sys 
 from time import sleep
+from datetime import datetime
 sys.path.insert(0, '../')        
 from SX127x.LoRa import *
 from SX127x.LoRaArgumentParser import LoRaArgumentParser
@@ -41,6 +42,11 @@ class LoRaRcvCont(LoRa):
         super(LoRaRcvCont, self).__init__(verbose)
         self.set_mode(MODE.SLEEP)
         self.set_dio_mapping([0] * 6)
+        
+        # Variable
+        self.logfile = None
+        self.testTime = 10
+        self.startTime = None
 
     def send_packet(self, packet):
         self.set_mode(MODE.STDBY)
@@ -54,33 +60,41 @@ class LoRaRcvCont(LoRa):
     def on_rx_done(self):
         BOARD.led_on()
         print("\nRxDone")
-        # self.clear_irq_flags(RxDone=1)
+        self.clear_irq_flags(RxDone=1)
+        self.reset_ptr_rx()
+        self.set_mode(MODE.RXCONT)
         payload = self.read_payload(nocheck=True)
         data = ''.join([chr(c) for c in payload])
-        print("Packet: {}".format(data))
-        print("RSSI: {}".format(self.get_rssi_value()))
-        print("SNR: {}".format(self.get_pkt_snr_value()))
+        # print("Packet: {}".format(data))
+        # print("RSSI: {}".format(self.get_rssi_value()))
+        # print("SNR: {}".format(self.get_pkt_snr_value()))
+        receiveTime = datetime.now()
+        rssi = self.get_rssi_value()
+        snr = self.get_pkt_snr_value()
         
-
-        # Change to TX
-        #print(bytes(payload).decode())
-        BOARD.led_off()
-        self.set_dio_mapping([1,0,0,0,0,0])
-        self.set_mode(MODE.STDBY)
-        sleep(0.01)
-        self.clear_irq_flags(TxDone=1)
-        self.send_packet(data)        
+        # Write
+        
+        self.logfile.write(str(data) + "," + str(len(payload)) + "," + str(datetime.timestamp(receiveTime)) + "," + str(rssi) + "," + str(snr) + "\n")
+        
+        # # Change to TX
+        # #print(bytes(payload).decode())
+        # BOARD.led_off()
+        # self.set_dio_mapping([1,0,0,0,0,0])
+        # self.set_mode(MODE.STDBY)
+        # # sleep(0.01)
+        # self.clear_irq_flags(TxDone=1)
+        # self.send_packet(data)        
         
         # self.set_mode(MODE.RXCONT)
 
     def on_tx_done(self):
         print("\nTxDone")
-        # print(self.get_irq_flags())
-        self.set_dio_mapping([0,0,0,0,0,0])
-        sleep(0.01)
-        self.reset_ptr_rx()
-        self.set_mode(MODE.RXCONT)
-        self.clear_irq_flags(RxDone=1)
+        # # print(self.get_irq_flags())
+        # self.set_dio_mapping([0,0,0,0,0,0])
+        # # sleep(0.01)
+        # self.reset_ptr_rx()
+        # self.set_mode(MODE.RXCONT)
+        # self.clear_irq_flags(RxDone=1)
         
 
     def on_cad_done(self):
@@ -102,48 +116,72 @@ class LoRaRcvCont(LoRa):
     def on_fhss_change_channel(self):
         print("\non_FhssChangeChannel")
         print(self.get_irq_flags())
+        
+    def end(self):
+        print("Receive End\n")
+        self.logfile.close()
+        sys.stdout.flush()
+        self.set_mode(MODE.SLEEP)
+        BOARD.teardown()
+        exit()
 
     def start(self):
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
+        
+        self.logfile = open("log/receiver.log", "w")
+        self.startTime = datetime.now()
+        
         while True:
-            sleep(0.01)
+            # sleep(0.01)
+            s = (datetime.now() - self.startTime).total_seconds()
+            if( s > self.testTime):
+                self.end()
+            else:
+                sleep(0.1)
             # rssi_value = self.get_rssi_value()
             # status = self.get_modem_status()
             # sys.stdout.flush()
             
             # sys.stdout.write("\r%d %d %d" % (rssi_value, status['rx_ongoing'], status['modem_clear']))
 
+if __name__ == "__main__":
+    lora = LoRaRcvCont(verbose=False)
+    args = parser.parse_args(lora)
 
-lora = LoRaRcvCont(verbose=False)
-args = parser.parse_args(lora)
-
-lora.set_mode(MODE.STDBY)
-lora.set_pa_config(pa_select=1)
-#lora.set_rx_crc(True)
-#lora.set_coding_rate(CODING_RATE.CR4_6)
-#lora.set_pa_config(max_power=0, output_power=0)
-#lora.set_lna_gain(GAIN.G1)
-#lora.set_implicit_header_mode(False)
-#lora.set_low_data_rate_optim(True)
-#lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
-#lora.set_agc_auto_on(True)
-
-print(lora)
-assert(lora.get_agc_auto_on() == 1)
-
-try: input("Press enter to start...")
-except: pass
-
-try:
+    # Setting
+    lora.set_mode(MODE.STDBY)
+    lora.set_pa_config(pa_select=1)
+    #lora.set_rx_crc(True)
+    #lora.set_coding_rate(CODING_RATE.CR4_6)
+    #lora.set_pa_config(max_power=0, output_power=0)
+    #lora.set_lna_gain(GAIN.G1)
+    #lora.set_implicit_header_mode(False)
+    #lora.set_low_data_rate_optim(True)
+    #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
+    #lora.set_agc_auto_on(True)
+    
+    
+    
+    # Start
     lora.start()
-except KeyboardInterrupt:
-    sys.stdout.flush()
-    print("")
-    sys.stderr.write("KeyboardInterrupt\n")
-finally:
-    sys.stdout.flush()
-    print("")
-    lora.set_mode(MODE.SLEEP)
-    print(lora)
-    BOARD.teardown()
+    
+
+    # print(lora)
+    # assert(lora.get_agc_auto_on() == 1)
+
+    # try: input("Press enter to start...")
+    # except: pass
+
+# try:
+#     lora.start()
+# except KeyboardInterrupt:
+#     sys.stdout.flush()
+#     print("")
+#     sys.stderr.write("KeyboardInterrupt\n")
+# finally:
+#     sys.stdout.flush()
+#     print("")
+#     lora.set_mode(MODE.SLEEP)
+#     print(lora)
+#     BOARD.teardown()

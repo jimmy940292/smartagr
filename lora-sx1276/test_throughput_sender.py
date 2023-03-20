@@ -25,6 +25,7 @@
 # python p2p_send.py -f 433 -b BW125 -s 12
 
 import sys 
+from datetime import datetime
 from time import sleep
 sys.path.insert(0, '..')        
 from SX127x.LoRa import *
@@ -47,34 +48,72 @@ class LoRaBeacon(LoRa):
         self.set_mode(MODE.SLEEP)
         self.set_dio_mapping([1,0,0,0,0,0])
         
+        # Variable
+        self.sentPacket = 0
+        self.AvgThroughput = 0.0
+        self.throughputList = None
+        self.sendTime = None
+        self.receiveTime = None
+        self.packetSize = 100
+        self.intervalTime = 0.00 # s
+        self.sequenceNumber = 0
+        self.logfile = None
+        self.numberofPackets = 100
+        
     def send_packet(self, packet):
-        self.set_mode(MODE.STDBY)
-        print("Send: {}".format(packet))
+        # self.set_mode(MODE.STDBY)
+        # print("Send: {}".format(packet))
+        
+        print("Packet: {}".format(self.sentPacket))
         data = [int(hex(ord(c)), 0) for c in packet]
         
-        data = list([0x00]*255)
+        # # Add length
+        # if(len(data) < self.packetsSize):
+        #     orginSize = len(data)
+        #     for i in range(self.packetSize - originSize):
+        #         data.append([])
+        
+        # data = list([0x00]*self.packetSize)
         self.write_payload(data)
         self.set_mode(MODE.TX)
+        self.sendTime = datetime.now()
+        
+        # Write 
+        self.logfile.write(str(self.sequenceNumber) + "," + str(len(data)) + "," + str(datetime.timestamp(self.sendTime)) + "\n")
+        
+        
+        self.sentPacket +=1
+        self.sequenceNumber +=1
+        
+        
 
     def on_rx_done(self):
-        # BOARD.led_on()
+        
         print("\nRxDone")
-        self.clear_irq_flags(RxDone=1)
-        payload = self.read_payload(nocheck=True)
-        data = ''.join([chr(c) for c in payload])
-        print("Packet: {}".format(data))
-        print("RSSI: {}".format(self.get_rssi_value()))
-        print("SNR: {}".format(self.get_pkt_snr_value()))
-        print()
+        
+        # # Calculate throughput
+        # self.receiveTime = time.time() 
+        
+        # self.throughputList[self.sentPacket -1] = self.packetSize / (self.receiveTime - self.sendTime)
+        
+        # # # BOARD.led_on()
+        # # print("\nRxDone")
+        # # # self.clear_irq_flags(RxDone=1)
+        # # payload = self.read_payload(nocheck=True)
+        # # data = ''.join([chr(c) for c in payload])
+        # # print("Packet: {}".format(data))
+        # # print("RSSI: {}".format(self.get_rssi_value()))
+        # # print("SNR: {}".format(self.get_pkt_snr_value()))
+        # # print()
         
         
-        self.end()
+        # # self.end()
                 
-        # Change to TX
-        # BOARD.led_off()
+        # # Change to TX
+        # # BOARD.led_off()
         # self.set_dio_mapping([1,0,0,0,0,0])    # TX
         # self.set_mode(MODE.STDBY)
-        # sleep(5)
+        # # sleep(5)
         # self.clear_irq_flags(TxDone=1)
         # data = "ABCD"
         # self.send_packet(data)
@@ -82,12 +121,20 @@ class LoRaBeacon(LoRa):
     def on_tx_done(self):
         # global args
         print("\nTxDone")
-        # Change to RX
-        self.set_dio_mapping([0,0,0,0,0,0])    # RX
-        sleep(0.01)
-        self.reset_ptr_rx()
-        self.set_mode(MODE.RXCONT)
-        self.clear_irq_flags(RxDone=1)
+        self.set_mode(MODE.STDBY)
+        self.clear_irq_flags(TxDone=1)
+        sleep(self.intervalTime)
+        
+        if(self.sentPacket < self.numberofPackets):
+            self.send_packet(str(self.sequenceNumber))
+        else:
+            self.end()
+        # # Change to RX
+        # self.set_dio_mapping([0,0,0,0,0,0])    # RX
+        # # sleep(0.01)
+        # self.reset_ptr_rx()
+        # self.set_mode(MODE.RXCONT)
+        # self.clear_irq_flags(RxDone=1)
         
         
 
@@ -116,14 +163,31 @@ class LoRaBeacon(LoRa):
         self.tx_counter = 0
         # BOARD.led_on()
         # self.write_payload([0x0f])
-        data = "ABCD"
+        data = str(self.sequenceNumber)
+
+
+        self.logfile = open("log/sender.log", "w")
+        
+        self.throughputList = [0.0] * self.numberofPackets 
+        
         self.send_packet(data)
-        while True:
-            sleep(0.01)
+        while(1):
+            continue
+            # if(self.sentPacket > self.numberofPackets):
+                
+            #     # Calculate Average throughput
+            #     # self.AvgThroughput = sum(self.throughputList) / len(self.throughputList)
+            #     # print("Avg throughput: {} kbps".format(self.AvgThroughput / 1000))
+                
+            #     self.end()
     def end(self):
+        
+        # Close log file
+        self.logfile.close()
+        
         sys.stdout.flush()
         self.set_mode(MODE.SLEEP)
-        print("Receive ACK")
+        # print("Receive ACK")
         BOARD.teardown()
         exit()
         
@@ -138,7 +202,7 @@ if __name__ == "__main__":
     # Setting
     lora.set_pa_config(pa_select=1)
     #lora.set_rx_crc(True)
-    #lora.set_agc_auto_on(True)
+    # lora.set_agc_auto_on(True)
     #lora.set_lna_gain(GAIN.NOT_USED)
     #lora.set_coding_rate(CODING_RATE.CR4_6)
     #lora.set_implicit_header_mode(False)
