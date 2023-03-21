@@ -24,9 +24,14 @@
 # usage:
 # python p2p_send.py -f 433 -b BW125 -s 12
 
+# Python Module
 import sys 
-from datetime import datetime
-from time import sleep
+import socket
+import struct
+import time
+import ntplib
+
+# Lora Module
 sys.path.insert(0, '..')        
 from SX127x.LoRa import *
 from SX127x.LoRaArgumentParser import LoRaArgumentParser
@@ -59,13 +64,31 @@ class LoRaBeacon(LoRa):
         self.sequenceNumber = 0
         self.logfile = None
         self.numberofPackets = 100
+        self.ntpOffset = None
+        self.data = []
         
-    def send_packet(self, packet):
+        
+    def set_packet_payload(self, seq):
+        # data = [int(hex(ord(c)), 0) for c in seq]
+        
+        # remain_size = self.packetSize - len(data)
+        
+        # for i in range(remain_size):
+        #     data.append(int(hex(ord('a')), 0))
+        
+        seq_data = [int(hex(ord(c)), 0) for c in seq]
+        self.data[:len(seq_data)] = seq_data
+        
+        # return data
+        
+    def send_packet(self, seq):
         # self.set_mode(MODE.STDBY)
         # print("Send: {}".format(packet))
         
-        print("Packet: {}".format(self.sentPacket))
-        data = [int(hex(ord(c)), 0) for c in packet]
+        self.sendTime = time.time() + self.ntpOffset
+        print("Packet: {}".format(seq))
+        self.set_packet_payload(seq)
+        
         
         # # Add length
         # if(len(data) < self.packetsSize):
@@ -74,13 +97,12 @@ class LoRaBeacon(LoRa):
         #         data.append([])
         
         # data = list([0x00]*self.packetSize)
-        self.write_payload(data)
+        print(len(self.data))
+        self.write_payload(self.data)
         self.set_mode(MODE.TX)
-        self.sendTime = datetime.now()
         
         # Write 
-        self.logfile.write(str(self.sequenceNumber) + "," + str(len(data)) + "," + str(datetime.timestamp(self.sendTime)) + "\n")
-        
+        self.logfile.write(str(self.sequenceNumber) + "," + str(len(self.data)) + "," + str(self.sendTime) + "\n")
         
         self.sentPacket +=1
         self.sequenceNumber +=1
@@ -123,7 +145,7 @@ class LoRaBeacon(LoRa):
         print("\nTxDone")
         self.set_mode(MODE.STDBY)
         self.clear_irq_flags(TxDone=1)
-        sleep(self.intervalTime)
+        time.sleep(self.intervalTime)
         
         if(self.sentPacket < self.numberofPackets):
             self.send_packet(str(self.sequenceNumber))
@@ -211,8 +233,23 @@ if __name__ == "__main__":
     #lora.set_low_data_rate_optim(True)
     #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
     
+   
+    
+    # Synchronize timestamp
+    ntp_client = ntplib.NTPClient()
+    response = ntp_client.request("pool.ntp.org")
+    ntp_timestamp = response.tx_time
+    
+    local_time = time.time()
+    lora.ntpOffset = ntp_timestamp - local_time
+    
+    # Set data
+    lora.data = list([int(hex(ord('a')), 0)] * lora.packetSize)
+    
     # Start
     lora.start()
+    
+
 
 
 # print(lora)

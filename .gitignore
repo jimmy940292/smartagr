@@ -1,1 +1,2 @@
-*.log
+wifi_log/
+lora-sx1276/log/

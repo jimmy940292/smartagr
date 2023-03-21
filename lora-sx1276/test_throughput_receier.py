@@ -24,9 +24,14 @@
 # usage:
 # python p2p_recv.py -f 433 -b BW125 -s 12
 
-import sys 
-from time import sleep
+# Python Module
+import sys
+import socket
+import struct 
+import time
+import ntplib
 from datetime import datetime
+# Lora Module
 sys.path.insert(0, '../')        
 from SX127x.LoRa import *
 from SX127x.LoRaArgumentParser import LoRaArgumentParser
@@ -45,8 +50,20 @@ class LoRaRcvCont(LoRa):
         
         # Variable
         self.logfile = None
-        self.testTime = 10
+        self.testTime = 25
         self.startTime = None
+        self.ntpOffset = None
+        
+    def read_packet_payload(self, data):
+        
+        seq_data = []
+        for c in data:
+            if(chr(c) == 'a'):
+                break
+            else:
+                seq_data.append(chr(c))
+                
+        return ''.join(seq_data)
 
     def send_packet(self, packet):
         self.set_mode(MODE.STDBY)
@@ -58,23 +75,28 @@ class LoRaRcvCont(LoRa):
         
         
     def on_rx_done(self):
-        BOARD.led_on()
+        
+        receiveTime = time.time() + self.ntpOffset
         print("\nRxDone")
         self.clear_irq_flags(RxDone=1)
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
         payload = self.read_payload(nocheck=True)
-        data = ''.join([chr(c) for c in payload])
+        # data = ''.join([chr(c) for c in payload])
+        
+        # Read payload
+        data = self.read_packet_payload(payload)
+        
         # print("Packet: {}".format(data))
         # print("RSSI: {}".format(self.get_rssi_value()))
         # print("SNR: {}".format(self.get_pkt_snr_value()))
-        receiveTime = datetime.now()
+        
         rssi = self.get_rssi_value()
         snr = self.get_pkt_snr_value()
         
         # Write
         
-        self.logfile.write(str(data) + "," + str(len(payload)) + "," + str(datetime.timestamp(receiveTime)) + "," + str(rssi) + "," + str(snr) + "\n")
+        self.logfile.write(str(data) + "," + str(len(payload)) + "," + str(receiveTime) + "," + str(rssi) + "," + str(snr) + "\n")
         
         # # Change to TX
         # #print(bytes(payload).decode())
@@ -138,7 +160,7 @@ class LoRaRcvCont(LoRa):
             if( s > self.testTime):
                 self.end()
             else:
-                sleep(0.1)
+                time.sleep(0.1)
             # rssi_value = self.get_rssi_value()
             # status = self.get_modem_status()
             # sys.stdout.flush()
@@ -161,7 +183,13 @@ if __name__ == "__main__":
     #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
     #lora.set_agc_auto_on(True)
     
+    # Synchronize timestamp
+    ntp_client = ntplib.NTPClient()
+    response = ntp_client.request("pool.ntp.org")
+    ntp_timestamp = response.tx_time
     
+    local_time = time.time()
+    lora.ntpOffset = ntp_timestamp - local_time
     
     # Start
     lora.start()
