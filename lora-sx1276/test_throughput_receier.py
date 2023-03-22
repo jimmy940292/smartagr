@@ -174,6 +174,7 @@ if __name__ == "__main__":
     # Setting
     lora.set_mode(MODE.STDBY)
     lora.set_pa_config(pa_select=1)
+    lora.set_pa_dac(True)
     #lora.set_rx_crc(True)
     
     # DR1
@@ -181,14 +182,15 @@ if __name__ == "__main__":
     # lora.set_bw(BW.BW125)
     
     # # DR2
-    lora.set_coding_rate(CODING_RATE.CR4_6)
-    lora.set_bw(BW.BW125)
+    # lora.set_coding_rate(CODING_RATE.CR4_6)
+    # lora.set_bw(BW.BW125)
     
     # DR4
-    # lora.set_coding_rate(CODING_RATE.CR4_8)
-    # lora.set_bw(BW.BW500)
+    lora.set_coding_rate(CODING_RATE.CR4_8)
+    lora.set_bw(BW.BW500)
     
-    #lora.set_pa_config(max_power=0, output_power=0)
+    # lora.set_pa_config(max_power=0x0F, output_power=0x0F)
+    lora.set_pa_config(max_power=0x00, output_power=0x00) 
     #lora.set_lna_gain(GAIN.G1)
     #lora.set_implicit_header_mode(False)
     lora.set_low_data_rate_optim(False)

@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 
 if __name__ == "__main__":
@@ -25,10 +26,19 @@ if __name__ == "__main__":
     currentLogPath = "log/"
     
     # Execute command
-    receiverCommand = ""
+    receiverCommand = "ssh " + receiverHostName + "@" + receiverIP + " " + " python3 smartagr/lora-sx1276/test_throughput_receiver.py "
+    os.system(receiverCommand)
     
-    senderCommand = ""
+    senderCommand = "ssh " + senderHostName + "@" + senderIP + " " + "python3 smartagr/lora-sx1276/test_throughput_sender.py"
+    os.system(senderCommand)
     
+    
+    time.sleep(30)
     # Copy log file commmand
+    receiverCommand = "scp " + receiverHostName + "@" + receiverIP + ":/home/rpiplus/smartagr/lora-sx1276/log/receiver.log" + " log/"
+    os.system(receiverCommand)
+    
+    senderCommand = "scp " + senderHostName + "@" + senderIP + ":/home/rpi/smartagr/lora-sx1276/log/sender.log" + " log/"
+    os.system(senderCommand)
     
     
