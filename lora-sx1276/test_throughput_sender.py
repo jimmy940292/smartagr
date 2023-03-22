@@ -31,6 +31,7 @@ import struct
 import time
 import ntplib
 import os
+import argparse
 
 # Lora Module
 sys.path.insert(0, '..')        
@@ -64,6 +65,8 @@ class LoRaBeacon(LoRa):
         self.intervalTime = 0.00 # s
         self.sequenceNumber = 0
         self.logfile = None
+        self.logFileName = ""
+        self.logFilePath = ""
         self.numberofPackets = 100
         self.ntpOffset = None
         self.data = []
@@ -190,7 +193,7 @@ class LoRaBeacon(LoRa):
         data = str(self.sequenceNumber)
 
 
-        self.logfile = open("/home/rpi/smartagr/lora-sx1276/log/sender.log", "w")
+        self.logfile = open(args.logFilePath + args.logFileName, "w")
         
         self.throughputList = [0.0] * self.numberofPackets 
         
@@ -220,9 +223,16 @@ class LoRaBeacon(LoRa):
 
 if __name__ == "__main__":
     
+    # Args parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--txpower", type=float, default=15)
+    parser.add_argument("--logFileName", type=str, default="lora_send.log")
+    parser.add_argument("--logFilePath", type=str, default="/home/rpi/smartagr/lora-sx1276/log/")
+    args = parser.parse_args()
+    
 
     lora = LoRaBeacon(verbose=False)
-    args = parser.parse_args(lora)
+    # args = parser.parse_args(lora)
 
     # Setting
     lora.set_mode(MODE.STDBY)
@@ -246,7 +256,7 @@ if __name__ == "__main__":
     
     #lora.set_implicit_header_mode(False)
     # lora.set_pa_config(max_power=0x0F, output_power=0x0F)
-    lora.set_pa_config(max_power=0x00, output_power=0x00) 
+    lora.set_pa_config(max_power=args.txpower, output_power=args.txpower) 
     lora.set_low_data_rate_optim(False)
     #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
     

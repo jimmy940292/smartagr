@@ -2,8 +2,8 @@ from datetime import datetime
 
 
 logFolderName = "log/"
-senderLogFileName = "sender.log"
-receiverLogFileName = "receiver.log"
+senderLogFileName = "lora_send.log"
+receiverLogFileName = "lora_recv.log"
 
 class PacketLog():
     

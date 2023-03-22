@@ -16,6 +16,8 @@ if __name__ == "__main__":
     receiverHostName = "rpiplus"
     receiverPassword = "rpi"
     
+    # Lora
+    
     # Folder path
     folderPath = "smartagr/lora-sx1276/"
     
@@ -39,10 +41,10 @@ if __name__ == "__main__":
     time.sleep(40)
 
     # Copy log file commmand
-    receiverCommand = "scp " + receiverHostName + "@" + receiverIP + ":/home/rpiplus/smartagr/lora-sx1276/log/receiver.log" + " log/"
+    receiverCommand = "scp " + receiverHostName + "@" + receiverIP + ":/home/rpiplus/smartagr/lora-sx1276/log/lora_recv.log" + " log/"
     os.system(receiverCommand)
     
-    senderCommand = "scp " + senderHostName + "@" + senderIP + ":/home/rpi/smartagr/lora-sx1276/log/sender.log" + " log/"
+    senderCommand = "scp " + senderHostName + "@" + senderIP + ":/home/rpi/smartagr/lora-sx1276/log/lora_send.log" + " log/"
     os.system(senderCommand)
 
     # Run log parser
@@ -50,4 +52,19 @@ if __name__ == "__main__":
     parsercommand = "python3 log_parser.py"
     os.system(parsercommand)
     
+    # WiFi
     
+    # Server command
+    serverCommand = "ssh -t " + receiverHostName + "@" + receiverIP + " " + "\" iperf -s -u \""
+    os.system(serverCommand + "&")
+    
+    # Client command
+    clientCommand = "ssh -t " + senderHostName + "@" + senderIP + " " + "\" python3 smartagr/wifi_test_client.py \""
+    os.system(clientCommand)
+    
+    # Wait for test
+    time.sleep(20)
+    
+    # Copy log
+    clientCommand = "scp " + senderHostName + "@" + senderIP + ":/home/rpi/smartagr/wifi_log/wifi_send.log " + " log/"
+    os.system(clientCommand)

@@ -50,8 +50,8 @@ if __name__ == '__main__':
     now = datetime.datetime.now()
     s = datetime.datetime.strftime(now,'%Y-%m-%d-%H:%M:%S')
     
-    output_folder = "wifi_log/"
-    output_file = open(output_folder + s +".log", "w")
+    output_folder = "/home/rpi/smartagr/wifi_log/"
+    output_file = open(output_folder + "wifi_send" +".log", "w")
     
     
     throughput = []
