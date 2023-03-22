@@ -50,7 +50,7 @@ class LoRaRcvCont(LoRa):
         
         # Variable
         self.logfile = None
-        self.testTime = 20
+        self.testTime = 30
         self.startTime = None
         self.ntpOffset = None
         
@@ -67,7 +67,7 @@ class LoRaRcvCont(LoRa):
 
     def send_packet(self, packet):
         self.set_mode(MODE.STDBY)
-        print("Send: {}".format(packet))
+        # print("Send: {}".format(packet))
         data = [int(hex(ord(c)), 0) for c in packet]
         self.write_payload(data)
         self.set_mode(MODE.TX)
@@ -77,7 +77,7 @@ class LoRaRcvCont(LoRa):
     def on_rx_done(self):
         
         receiveTime = time.time() + self.ntpOffset
-        print("\nRxDone")
+        # print("\nRxDone")
         self.clear_irq_flags(RxDone=1)
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
@@ -175,11 +175,23 @@ if __name__ == "__main__":
     lora.set_mode(MODE.STDBY)
     lora.set_pa_config(pa_select=1)
     #lora.set_rx_crc(True)
-    lora.set_coding_rate(CODING_RATE.CR4_8)
+    
+    # DR1
+    # lora.set_coding_rate(CODING_RATE.CR4_5)
+    # lora.set_bw(BW.BW125)
+    
+    # # DR2
+    lora.set_coding_rate(CODING_RATE.CR4_6)
+    lora.set_bw(BW.BW125)
+    
+    # DR4
+    # lora.set_coding_rate(CODING_RATE.CR4_8)
+    # lora.set_bw(BW.BW500)
+    
     #lora.set_pa_config(max_power=0, output_power=0)
     #lora.set_lna_gain(GAIN.G1)
     #lora.set_implicit_header_mode(False)
-    lora.set_low_data_rate_optim(True)
+    lora.set_low_data_rate_optim(False)
     #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
     #lora.set_agc_auto_on(True)
     
