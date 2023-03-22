@@ -26,10 +26,10 @@ if __name__ == "__main__":
     currentLogPath = "log/"
     
     # Execute command
-    receiverCommand = "ssh " + receiverHostName + "@" + receiverIP + " " + " python3 smartagr/lora-sx1276/test_throughput_receiver.py "
+    receiverCommand = "ssh " + receiverHostName + "@" + receiverIP + " " + "\" cd smartagr/lora-sx1276/ | python3 test_throughput_receiver.py \""
     os.system(receiverCommand)
     
-    senderCommand = "ssh " + senderHostName + "@" + senderIP + " " + "python3 smartagr/lora-sx1276/test_throughput_sender.py"
+    senderCommand = "ssh " + senderHostName + "@" + senderIP + " " + "\" cd smartagr/lora-sx1276/ | python3 test_throughput_sender.py \""
     os.system(senderCommand)
     
     
