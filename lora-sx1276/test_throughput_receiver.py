@@ -31,6 +31,7 @@ import struct
 import time
 import ntplib
 from datetime import datetime
+import os
 # Lora Module
 sys.path.insert(0, '../')        
 from SX127x.LoRa import *
@@ -151,7 +152,7 @@ class LoRaRcvCont(LoRa):
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
         
-        self.logfile = open("log/receiver.log", "w")
+        self.logfile = open( "/home/rpiplus/smartagr/lora-sx1276/log/receiver.log", "w")
         self.startTime = datetime.now()
         
         while True:

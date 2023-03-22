@@ -30,6 +30,7 @@ import socket
 import struct
 import time
 import ntplib
+import os
 
 # Lora Module
 sys.path.insert(0, '..')        
@@ -189,7 +190,7 @@ class LoRaBeacon(LoRa):
         data = str(self.sequenceNumber)
 
 
-        self.logfile = open("log/sender.log", "w")
+        self.logfile = open("/home/rpi/smartagr/lora-sx1276/log/sender.log", "w")
         
         self.throughputList = [0.0] * self.numberofPackets 
         

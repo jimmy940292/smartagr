@@ -1,7 +1,7 @@
 import sys
 import os
 import time
-
+import subprocess
 
 if __name__ == "__main__":
     
@@ -26,19 +26,28 @@ if __name__ == "__main__":
     currentLogPath = "log/"
     
     # Execute command
-    receiverCommand = "ssh " + receiverHostName + "@" + receiverIP + " " + "\" cd smartagr/lora-sx1276/ | python3 test_throughput_receiver.py \""
-    os.system(receiverCommand)
+    receiverCommand = "ssh -t " + receiverHostName + "@" + receiverIP + " " + "\" python3 smartagr/lora-sx1276/test_throughput_receiver.py \""
+    os.system(receiverCommand + " &")
+    # os.system("exit")
     
-    senderCommand = "ssh " + senderHostName + "@" + senderIP + " " + "\" cd smartagr/lora-sx1276/ | python3 test_throughput_sender.py \""
+    senderCommand = "ssh -t " + senderHostName + "@" + senderIP + " " + "\" python3 smartagr/lora-sx1276/test_throughput_sender.py \""
     os.system(senderCommand)
+    # os.system("exit")
     
-    
-    time.sleep(30)
+
+    # Wait for the receiver
+    time.sleep(40)
+
     # Copy log file commmand
     receiverCommand = "scp " + receiverHostName + "@" + receiverIP + ":/home/rpiplus/smartagr/lora-sx1276/log/receiver.log" + " log/"
     os.system(receiverCommand)
     
     senderCommand = "scp " + senderHostName + "@" + senderIP + ":/home/rpi/smartagr/lora-sx1276/log/sender.log" + " log/"
     os.system(senderCommand)
+
+    # Run log parser
+    print()
+    parsercommand = "python3 log_parser.py"
+    os.system(parsercommand)
     
     
