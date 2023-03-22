@@ -85,8 +85,8 @@ class LoRaBeacon(LoRa):
         # self.set_mode(MODE.STDBY)
         # print("Send: {}".format(packet))
         
-        self.sendTime = time.time() + self.ntpOffset
-        print("Packet: {}".format(seq))
+        
+        # print("Packet: {}".format(seq))
         self.set_packet_payload(seq)
         
         
@@ -97,10 +97,11 @@ class LoRaBeacon(LoRa):
         #         data.append([])
         
         # data = list([0x00]*self.packetSize)
-        print(len(self.data))
+        # print(len(self.data))
         self.write_payload(self.data)
         self.set_mode(MODE.TX)
         
+        self.sendTime = time.time() + self.ntpOffset
         # Write 
         self.logfile.write(str(self.sequenceNumber) + "," + str(len(self.data)) + "," + str(self.sendTime) + "\n")
         
@@ -142,10 +143,10 @@ class LoRaBeacon(LoRa):
 
     def on_tx_done(self):
         # global args
-        print("\nTxDone")
-        self.set_mode(MODE.STDBY)
+        # print("\nTxDone")
+        # self.set_mode(MODE.STDBY)
         self.clear_irq_flags(TxDone=1)
-        time.sleep(self.intervalTime)
+        # time.sleep(self.intervalTime)
         
         if(self.sentPacket < self.numberofPackets):
             self.send_packet(str(self.sequenceNumber))
@@ -194,6 +195,7 @@ class LoRaBeacon(LoRa):
         
         self.send_packet(data)
         while(1):
+            time.sleep(0.01)
             continue
             # if(self.sentPacket > self.numberofPackets):
                 
@@ -226,11 +228,23 @@ if __name__ == "__main__":
     #lora.set_rx_crc(True)
     # lora.set_agc_auto_on(True)
     #lora.set_lna_gain(GAIN.NOT_USED)
-    #lora.set_coding_rate(CODING_RATE.CR4_6)
+    
+    # DR1
+    # lora.set_coding_rate(CODING_RATE.CR4_5)
+    # lora.set_bw(BW.BW125)
+    
+    # # DR2
+    lora.set_coding_rate(CODING_RATE.CR4_6)
+    lora.set_bw(BW.BW125)
+    
+    # # DR4
+    # lora.set_coding_rate(CODING_RATE.CR4_8)
+    # lora.set_bw(BW.BW500)
+    
     #lora.set_implicit_header_mode(False)
     #lora.set_pa_config(max_power=0x04, output_power=0x0F)
     #lora.set_pa_config(max_power=0x04, output_power=0b01000000)
-    #lora.set_low_data_rate_optim(True)
+    lora.set_low_data_rate_optim(False)
     #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
     
    

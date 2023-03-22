@@ -67,7 +67,7 @@ if __name__ == "__main__":
             t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
             t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp)
             delta = (t2 - t1).total_seconds() * 1000.0
-            throughputList.append(receivePacket[recvIndex].packetSize / delta) # kbps
+            throughputList.append(receivePacket[recvIndex].packetSize * 8.0 / 1000.0/ delta *1000.0) # kbps
             latencyList.append(delta) # ms
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
