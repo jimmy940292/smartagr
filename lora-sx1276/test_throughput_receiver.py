@@ -31,7 +31,9 @@ import struct
 import time
 import ntplib
 from datetime import datetime
+import argparse
 import os
+
 # Lora Module
 sys.path.insert(0, '../')        
 from SX127x.LoRa import *
@@ -152,7 +154,7 @@ class LoRaRcvCont(LoRa):
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
         
-        self.logfile = open( "/home/rpiplus/smartagr/lora-sx1276/log/receiver.log", "w")
+        self.logfile = open( args.logFilePath + args.logFileName, "w")
         self.startTime = datetime.now()
         
         while True:
@@ -169,8 +171,17 @@ class LoRaRcvCont(LoRa):
             # sys.stdout.write("\r%d %d %d" % (rssi_value, status['rx_ongoing'], status['modem_clear']))
 
 if __name__ == "__main__":
+    
+    # Args parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--txpower", type=float, default=15)
+    parser.add_argument("--logFileName", type=str, default="lora_recv.log")
+    parser.add_argument("--logFilePath", type=str, default="/home/rpiplus/smartagr/lora-sx1276/log/")
+    args = parser.parse_args()
+    
+    
     lora = LoRaRcvCont(verbose=False)
-    args = parser.parse_args(lora)
+    # args = parser.parse_args(lora)
 
     # Setting
     lora.set_mode(MODE.STDBY)
@@ -191,7 +202,7 @@ if __name__ == "__main__":
     lora.set_bw(BW.BW500)
     
     # lora.set_pa_config(max_power=0x0F, output_power=0x0F)
-    lora.set_pa_config(max_power=0x00, output_power=0x00) 
+    lora.set_pa_config(max_power=args.txpower, output_power=args.txpower) 
     #lora.set_lna_gain(GAIN.G1)
     #lora.set_implicit_header_mode(False)
     lora.set_low_data_rate_optim(False)
@@ -200,7 +211,8 @@ if __name__ == "__main__":
     
     # Synchronize timestamp
     ntp_client = ntplib.NTPClient()
-    response = ntp_client.request("pool.ntp.org")
+    # response = ntp_client.request("pool.ntp.org")
+    response = ntp_client.request("192.168.0.70")
     ntp_timestamp = response.tx_time
     
     local_time = time.time()

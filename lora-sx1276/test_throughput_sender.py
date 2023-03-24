@@ -264,7 +264,8 @@ if __name__ == "__main__":
     
     # Synchronize timestamp
     ntp_client = ntplib.NTPClient()
-    response = ntp_client.request("pool.ntp.org")
+    # response = ntp_client.request("pool.ntp.org")
+    response = ntp_client.request("192.168.0.70")
     ntp_timestamp = response.tx_time
     
     local_time = time.time()
