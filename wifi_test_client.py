@@ -2,14 +2,19 @@ import os
 import subprocess
 import re
 import datetime
+import argparse
+import pywifi
+import time
 
 def get_wifi_signal_strength(interface='wlan1'):
     """
     Returns the Wi-Fi signal strength (RSSI) in dBm.
     """
     cmd = ['iwlist', interface, 'scan']
+    # cmd = "iwlist " + interface + " scan | grep -e Pi_adhoc -e level"
     output = subprocess.check_output(cmd).decode('utf-8')
-
+    # output = os.system(cmd)
+    # print(output)
     # Search for the line with the signal strength
     match = re.search(r'Signal level=(-\d+) dBm', output)
     if match:
@@ -18,13 +23,34 @@ def get_wifi_signal_strength(interface='wlan1'):
 
     return None
 
+# def get_wifi_signal_strength(interface='wlan1'):
+    
+#     wifi= pywifi.PyWiFi()
+    
+#     iface = wifi.interfaces()[0]
+    
+#     # iface.enable()
+#     iface.scan()
+#     time.sleep(1)
+#     wifi_list = iface.scan_results()
+#     rssi = 0.0
+#     print(wifi_list)
+    
+#     for w in wifi_list:
+#         print(w.rssi)
+#         if (w.ssid == "Pi_adhoc"):
+#             rssi = w.rssi
+            
+#     return rssi
+
 def get_wifi_snr(interface='wlan1'):
     """
     Returns the Wi-Fi signal-to-noise ratio (SNR) in dB.
     """
     cmd = ['iwconfig', interface]
     output = subprocess.check_output(cmd).decode('utf-8')
-
+    # cmd = "iwconfig " + interface
+    # output = os.system(cmd)
     # Search for the line with the signal level and noise level
     match = re.search(r'Link Quality=(\d+)/(\d+)\s+Signal level=(-\d+) dBm.*Noise level=(-\d+) dBm', output)
     if match:
@@ -35,7 +61,31 @@ def get_wifi_snr(interface='wlan1'):
 
     return None
 
+# def get_wifi_snr(interface='wlan1'):
+    
+#     wifi= pywifi.PyWiFi()
+    
+#     iface = wifi.interfaces()[0]
+    
+#     # iface.enable()
+#     iface.scan()
+#     time.sleep(1)
+#     wifi_list = iface.scan_results()
+#     snr = 0.0
+    
+#     for w in wifi_list:
+#         print(w.signal)
+#         if (w.ssid == "Pi_adhoc"):
+#             snr = w.signal
+            
+#     return snr
+
 if __name__ == '__main__':
+    
+    # Args parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--expNumber", type=int, default=0)
+    args = parser.parse_args()
     
     # Parameter
     server_ip = "192.168.1.6"
@@ -51,7 +101,7 @@ if __name__ == '__main__':
     s = datetime.datetime.strftime(now,'%Y-%m-%d-%H:%M:%S')
     
     output_folder = "/home/rpi/smartagr/wifi_log/"
-    output_file = open(output_folder + "wifi_send" +".log", "w")
+    output_file = open(output_folder + "wifi_send" + "_" + str(args.expNumber) + ".log", "w")
     
     
     throughput = []

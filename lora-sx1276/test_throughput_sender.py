@@ -69,6 +69,8 @@ class LoRaBeacon(LoRa):
         self.logFilePath = ""
         self.numberofPackets = 100
         self.ntpOffset = None
+        self.txpower = 0.0
+        self.expNumber = 0
         self.data = []
         
         
@@ -105,7 +107,8 @@ class LoRaBeacon(LoRa):
         self.write_payload(self.data)
         self.set_mode(MODE.TX)
         
-        self.sendTime = time.time() + self.ntpOffset
+        # self.sendTime = time.time() + self.ntpOffset
+        self.sendTime = time.time()
         # Write 
         self.logfile.write(str(self.sequenceNumber) + "," + str(len(self.data)) + "," + str(self.sendTime) + "\n")
         
@@ -193,7 +196,7 @@ class LoRaBeacon(LoRa):
         data = str(self.sequenceNumber)
 
 
-        self.logfile = open(args.logFilePath + args.logFileName, "w")
+        self.logfile = open(self.logFilePath + self.logFileName + "_" + str(self.expNumber) + ".log", "w")
         
         self.throughputList = [0.0] * self.numberofPackets 
         
@@ -220,19 +223,43 @@ class LoRaBeacon(LoRa):
         exit()
         
 
+def test_syn_timestamp():
+    
+    while(1):
+        print("Timestamp: {}".format(round(time.time(), 1)))
+        time.sleep(1)
+        
+       
+        
+
 
 if __name__ == "__main__":
+    
+    
+    # Test syn timestamp
+    # test_syn_timestamp()
     
     # Args parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--txpower", type=float, default=15)
-    parser.add_argument("--logFileName", type=str, default="lora_send.log")
+    parser.add_argument("--logFileName", type=str, default="lora_send")
     parser.add_argument("--logFilePath", type=str, default="/home/rpi/smartagr/lora-sx1276/log/")
+    parser.add_argument("--expNumber", type=int, default=0)
     args = parser.parse_args()
     
-
     lora = LoRaBeacon(verbose=False)
     # args = parser.parse_args(lora)
+    
+    # Set args
+    lora.txpower = args.txpower
+    lora.logFileName = args.logFileName
+    lora.logFilePath = args.logFilePath
+    lora.expNumber = args.expNumber
+    
+    
+    
+    
+    
 
     # Setting
     lora.set_mode(MODE.STDBY)
@@ -256,20 +283,19 @@ if __name__ == "__main__":
     
     #lora.set_implicit_header_mode(False)
     # lora.set_pa_config(max_power=0x0F, output_power=0x0F)
-    lora.set_pa_config(max_power=args.txpower, output_power=args.txpower) 
+    lora.set_pa_config(max_power=lora.txpower, output_power=lora.txpower) 
     lora.set_low_data_rate_optim(False)
     #lora.set_pa_ramp(PA_RAMP.RAMP_50_us)
     
    
     
-    # Synchronize timestamp
-    ntp_client = ntplib.NTPClient()
-    # response = ntp_client.request("pool.ntp.org")
-    response = ntp_client.request("192.168.0.70")
-    ntp_timestamp = response.tx_time
-    
-    local_time = time.time()
-    lora.ntpOffset = ntp_timestamp - local_time
+    # # Synchronize timestamp
+    # ntp_client = ntplib.NTPClient()
+    # # response = ntp_client.request("pool.ntp.org")
+    # response = ntp_client.request("192.168.0.70")
+    # ntp_timestamp = response.tx_time
+    # local_time = time.time()
+    # lora.ntpOffset = ntp_timestamp - local_time
     
     # Set data
     lora.data = list([int(hex(ord('a')), 0)] * lora.packetSize)
