@@ -6,13 +6,13 @@ import argparse
 
 
 # Sender
-senderIP = "10.0.0.2"
+senderIP = "10.0.0.1"
 senderHostName = "rpi"
 senderPassword = "rpi"
 senderp = "sshpass -p " + senderPassword + " "
 
 # Receiver
-receiverIP = "10.0.0.1"
+receiverIP = "10.0.1.1"
 receiverHostName = "rpiplus"
 receiverPassword = "rpi"
 receiverp = "sshpass -p " + receiverPassword + " "
@@ -44,22 +44,22 @@ def test_wifi(exp_number):
 
         # Client command
         clientCommand = "ssh -t " + senderHostName + "@" + senderIP + \
-            " " + "\" python3 smartagr/wifi_test_client.py  --expNumber " + str(exp_number) + "\""
+            " " + "\" python3 smartagr/wifi_test_client.py  --expNumber " + str(i) + "\""
         os.system(senderp + clientCommand)
 
         # Wait for test
         time.sleep(10)
 
     # Copy log
-        clientCommand = "scp " + senderHostName + "@" + senderIP + \
-            ":/home/rpi/smartagr/wifi_log/*.log " + " log/"
-        os.system(senderp + clientCommand)
+    clientCommand = "scp " + senderHostName + "@" + senderIP + \
+        ":/home/rpi/smartagr/wifi_log/*.log " + " log/"
+    os.system(senderp + clientCommand)
         
 def test_lora(exp_number):
     
     # Delete old log
     os.system(senderp + "ssh -t " + senderHostName + "@" + senderIP + " " + " rm /home/rpi/smartagr/lora-sx1276/log/*.log")
-    os.system(receiverp + "ssh -t" + receiverHostName + "@" + receiverIP + " " + " rm /home/rpiplus/smartagr/lora-sx1276/log/*.log")
+    os.system(receiverp + "ssh -t " + receiverHostName + "@" + receiverIP + " " + " rm /home/rpiplus/smartagr/lora-sx1276/log/*.log")
     
     for i in range(exp_number + 1):
         # Execute command
