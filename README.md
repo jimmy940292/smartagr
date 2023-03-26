@@ -3,6 +3,11 @@
 ## Wi-Fi
 Test the  wifi transmission between two RPIs
 
+### Set wifi interface to the ad hoc mode
+
+    sh wifi_setting_1.sh # Sender (rpi)
+    sh wifi_setting_2.sh # Receiver (rpiplus)
+
 ### Receiver
 
     python wifi_test_server.py
@@ -20,8 +25,8 @@ lora module from https://github.com/raspberrypi-tw/lora-sx1276
 
 ### Receiver
 
-    sudo python p2p_recv.py
+    sudo python test_throughput_receiver.py
   
 ### Sender
 
-    sudo python p2p_send.py
+    sudo python test_throughput_sender.py
