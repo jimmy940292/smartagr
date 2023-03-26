@@ -30,3 +30,8 @@ lora module from https://github.com/raspberrypi-tw/lora-sx1276
 ### Sender
 
     sudo python test_throughput_sender.py
+
+
+## SSH
+
+    python lora_test_ssh.py --expNumber 9
