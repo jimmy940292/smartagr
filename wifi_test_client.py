@@ -3,14 +3,13 @@ import subprocess
 import re
 import datetime
 import argparse
-import pywifi
 import time
 
 def get_wifi_signal_strength(interface='wlan1'):
     """
     Returns the Wi-Fi signal strength (RSSI) in dBm.
     """
-    cmd = ['iwlist', interface, 'scan']
+    cmd = ['/usr/sbin/iwlist', interface, 'scan']
     # cmd = "iwlist " + interface + " scan | grep -e Pi_adhoc -e level"
     output = subprocess.check_output(cmd).decode('utf-8')
     # output = os.system(cmd)
@@ -47,7 +46,7 @@ def get_wifi_snr(interface='wlan1'):
     """
     Returns the Wi-Fi signal-to-noise ratio (SNR) in dB.
     """
-    cmd = ['iwconfig', interface]
+    cmd = ['/usr/sbin/iwconfig', interface]
     output = subprocess.check_output(cmd).decode('utf-8')
     # cmd = "iwconfig " + interface
     # output = os.system(cmd)

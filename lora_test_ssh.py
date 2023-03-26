@@ -6,14 +6,16 @@ import argparse
 
 
 # Sender
-senderIP = "192.168.0.80"
+senderIP = "10.0.0.2"
 senderHostName = "rpi"
 senderPassword = "rpi"
+senderp = "sshpass -p " + senderPassword + " "
 
 # Receiver
-receiverIP = "192.168.0.108"
+receiverIP = "10.0.0.1"
 receiverHostName = "rpiplus"
 receiverPassword = "rpi"
+receiverp = "sshpass -p " + receiverPassword + " "
 
 # Lora
 
@@ -29,18 +31,21 @@ currentLogPath = "log/"
 
 def test_wifi(exp_number):
     
-    for i in range(exp_number):
+    # Delete old log
+    os.system(senderp + "ssh -t " + senderHostName + "@" + senderIP + " " + " rm /home/rpi/smartagr/wifi_log/*.log")
+    
+    for i in range(exp_number + 1):
         # WiFi
 
         # Server command
         serverCommand = "ssh -t " + receiverHostName + \
             "@" + receiverIP + " " + "\" iperf -s -u \""
-        os.system(serverCommand + "&")
+        os.system(receiverp + serverCommand + "&")
 
         # Client command
         clientCommand = "ssh -t " + senderHostName + "@" + senderIP + \
             " " + "\" python3 smartagr/wifi_test_client.py  --expNumber " + str(exp_number) + "\""
-        os.system(clientCommand)
+        os.system(senderp + clientCommand)
 
         # Wait for test
         time.sleep(10)
@@ -48,22 +53,26 @@ def test_wifi(exp_number):
     # Copy log
         clientCommand = "scp " + senderHostName + "@" + senderIP + \
             ":/home/rpi/smartagr/wifi_log/*.log " + " log/"
-        os.system(clientCommand)
+        os.system(senderp + clientCommand)
         
 def test_lora(exp_number):
+    
+    # Delete old log
+    os.system(senderp + "ssh -t " + senderHostName + "@" + senderIP + " " + " rm /home/rpi/smartagr/lora-sx1276/log/*.log")
+    os.system(receiverp + "ssh -t" + receiverHostName + "@" + receiverIP + " " + " rm /home/rpiplus/smartagr/lora-sx1276/log/*.log")
     
     for i in range(exp_number + 1):
         # Execute command
         receiverCommand = "ssh -t " + receiverHostName + "@" + receiverIP + \
             " " + "\" python3 smartagr/lora-sx1276/test_throughput_receiver.py --expNumber " + \
             str(i) + " \""
-        os.system(receiverCommand + " &")
+        os.system(receiverp + receiverCommand + " &")
         # os.system("exit")
 
         senderCommand = "ssh -t " + senderHostName + "@" + senderIP + " " + \
             "\" python3 smartagr/lora-sx1276/test_throughput_sender.py --expNumber " + \
             str(i) + " \""
-        os.system(senderCommand)
+        os.system(senderp + senderCommand)
         # os.system("exit")
 
         # Wait for the receiver
@@ -72,11 +81,11 @@ def test_lora(exp_number):
     # Copy log file commmand
     receiverCommand = "scp " + receiverHostName + "@" + receiverIP + \
         ":/home/rpiplus/smartagr/lora-sx1276/log/*.log" + " log/"
-    os.system(receiverCommand)
+    os.system(receiverp + receiverCommand)
 
     senderCommand = "scp " + senderHostName + "@" + senderIP + \
         ":/home/rpi/smartagr/lora-sx1276/log/*.log" + " log/"
-    os.system(senderCommand)
+    os.system(senderp + senderCommand)
 
 if __name__ == "__main__":
     
