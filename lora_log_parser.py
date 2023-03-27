@@ -5,6 +5,7 @@ import seaborn as sns
 import numpy as np
 import os
 import pandas as pd
+import matplotlib.ticker as ticker
 
 
 logFolderName = "example_data/"
@@ -99,7 +100,7 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
     
     return avgThroughput, avgLatency, packetLoss, avgRssi, avgSnr
     
-def draw_avg(senderLogFiles, receiverLogFiles):
+def draw_avg_bar(senderLogFiles, receiverLogFiles):
 
     avgThroughputList = []
     avgLatencyList = []
@@ -116,7 +117,7 @@ def draw_avg(senderLogFiles, receiverLogFiles):
         avgSnr.append(s)
         
     # Draw Fig
-    figFolder = "fig/"
+    figFolder = "fig/lora/"
     
     # Throughput
     avgThroughputList = np.array(avgThroughputList)
@@ -126,7 +127,7 @@ def draw_avg(senderLogFiles, receiverLogFiles):
     plt.xlabel("Exp Number")
     plt.ylabel("Throughput (kbps)")
     plot_throughput = plot_throughput.get_figure()
-    plot_throughput.savefig(figFolder + "throughput.png")
+    plot_throughput.savefig(figFolder + "throughput_bar.png")
     plt.show()
     
     # Latency
@@ -137,7 +138,7 @@ def draw_avg(senderLogFiles, receiverLogFiles):
     plt.xlabel("Exp Number")
     plt.ylabel("Latency (ms)")
     plot_latency = plot_latency.get_figure()
-    plot_latency.savefig(figFolder + "latency.png")
+    plot_latency.savefig(figFolder + "latency_bar.png")
     plt.show()
     
     # Packet loss rate
@@ -148,7 +149,7 @@ def draw_avg(senderLogFiles, receiverLogFiles):
     plt.xlabel("Exp Number")
     plt.ylabel("Packet loss rate (%)")
     plot_packetloss = plot_packetloss.get_figure()
-    plot_packetloss.savefig(figFolder + "packetlossrate.png")
+    plot_packetloss.savefig(figFolder + "packetlossrate_bar.png")
     plt.show()
     
     
@@ -161,19 +162,103 @@ def draw_avg(senderLogFiles, receiverLogFiles):
     plt.xlabel("Exp Number")
     plt.ylabel("SNR (dB)")
     plot_snr = plot_snr.get_figure()
-    plot_snr.savefig(figFolder + "snr.png")
+    plot_snr.savefig(figFolder + "snr_bar.png")
     plt.show()
     
     # RSSI
     avgRssiList = np.array(avgRssiList)
+    newRssiList = avgRssiList
     avgRssiList = np.reshape(avgRssiList, (1, len(avgRssiList)))
     avgRssiList = pd.DataFrame(avgRssiList)
     plot_rssi = sns.barplot(data=avgRssiList)
     plt.xlabel("Exp Number")
     plt.ylabel("RSSI (dBm)")
-    plt.ylim(min(avgRssiList), max(avgRssiList))
+    plt.ylim(min(newRssiList), 0)
     plot_rssi = plot_rssi.get_figure()
-    plot_rssi.savefig(figFolder + "rssi.png")
+    plot_rssi.savefig(figFolder + "rssi_bar.png")
+    plt.show()
+    
+
+def draw_avg_line(senderLogFiles, receiverLogFiles):
+
+    avgThroughputList = []
+    avgLatencyList = []
+    packetLossList = []
+    avgRssiList = []
+    avgSnr = []
+
+    for i in range(len(senderLogFiles)):
+        t, l, p, r, s = cal_avg_metric(
+            senderLogFiles[i], receiverLogFiles[i], False)
+        avgThroughputList.append(t)
+        avgLatencyList.append(l)
+        packetLossList.append(p)
+        avgRssiList.append(r)
+        avgSnr.append(s)
+
+    # Draw Fig
+    figFolder = "fig/lora/"
+
+    # Throughput
+    avgThroughputList = np.array(avgThroughputList)
+    avgThroughputList = pd.DataFrame({"Throughput":avgThroughputList})
+    plot_throughput = sns.lineplot( y="Throughput", x=avgThroughputList.index, data=avgThroughputList, markers="o")
+    plot_throughput.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    plot_throughput.xaxis.set_major_formatter(ticker.ScalarFormatter())
+    plt.xlabel("Exp Number")
+    plt.ylabel("Throughput (kbps)")
+    plot_throughput = plot_throughput.get_figure()
+    plot_throughput.savefig(figFolder + "throughput_line.png")
+    plt.show()
+
+    # Latency
+    avgLatencyList = np.array(avgLatencyList)
+    avgLatencyList = pd.DataFrame({"Latency": avgLatencyList})
+    plot_latency = sns.lineplot( y="Latency", x=avgLatencyList.index, data=avgLatencyList, markers="o")
+    plot_latency.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    plot_latency.xaxis.set_major_formatter(ticker.ScalarFormatter())
+    plt.xlabel("Exp Number")
+    plt.ylabel("Latency (ms)")
+    plot_latency = plot_latency.get_figure()
+    plot_latency.savefig(figFolder + "latency_line.png")
+    plt.show()
+
+    # Packet loss rate
+    packetLossList = np.array(packetLossList)
+    packetLossList = pd.DataFrame({"Packetlossrate": packetLossList})
+    plot_packetloss = sns.lineplot( y="Packetlossrate", x=packetLossList.index, data=packetLossList, markers="o")
+    plot_packetloss.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    plot_packetloss.xaxis.set_major_formatter(ticker.ScalarFormatter())
+    plt.xlabel("Exp Number")
+    plt.ylabel("Packet loss rate (%)")
+    plot_packetloss = plot_packetloss.get_figure()
+    plot_packetloss.savefig(figFolder + "packetlossrate_line.png")
+    plt.show()
+
+    # SNR
+    avgSnr = np.array(avgSnr)
+    avgSnr = pd.DataFrame({"SNR": avgSnr})
+    plot_snr = sns.lineplot(y="SNR", x=avgSnr.index, data=avgSnr, markers="o")
+    plot_snr.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    plot_snr.xaxis.set_major_formatter(ticker.ScalarFormatter())
+    plt.xlabel("Exp Number")
+    plt.ylabel("SNR (dB)")
+    plot_snr = plot_snr.get_figure()
+    plot_snr.savefig(figFolder + "snr_line.png")
+    plt.show()
+
+    # RSSI
+    avgRssiList = np.array(avgRssiList)
+    newRssiList = avgRssiList
+    avgRssiList = pd.DataFrame({"RSSI": avgRssiList})
+    plot_rssi = sns.lineplot(y="RSSI", x=avgRssiList.index, data=avgRssiList, markers="o")
+    plot_rssi.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    plot_rssi.xaxis.set_major_formatter(ticker.ScalarFormatter())
+    plt.xlabel("Exp Number")
+    plt.ylabel("RSSI (dBm)")
+    plt.ylim(min(newRssiList), max(newRssiList))
+    plot_rssi = plot_rssi.get_figure()
+    plot_rssi.savefig(figFolder + "rssi_line.png")
     plt.show()
     
     
@@ -199,7 +284,12 @@ if __name__ == "__main__":
             
             senderLogFiles.append(s_file)
             receiverLogFiles.append(r_file)
-        draw_avg(senderLogFiles, receiverLogFiles)            
+        
+        # Bar
+        draw_avg_bar(senderLogFiles, receiverLogFiles)
+        
+        # Line
+        # draw_avg_line(senderLogFiles, receiverLogFiles)
     else:
         # Open log files
         senderLogFile = open(logFolderName + senderLogFileName + "_" + str(args.expNumber) + ".log", "r")
