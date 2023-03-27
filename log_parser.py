@@ -7,7 +7,7 @@ import os
 import pandas as pd
 
 
-logFolderName = "log/"
+logFolderName = "example_data/"
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
 
@@ -130,13 +130,51 @@ def draw_avg(senderLogFiles, receiverLogFiles):
     plt.show()
     
     # Latency
+    avgLatencyList = np.array(avgLatencyList)
+    avgLatencyList = np.reshape(avgLatencyList, (1, len(avgLatencyList)))
+    avgLatencyList = pd.DataFrame(avgLatencyList)
+    plot_latency = sns.barplot(data=avgLatencyList)
+    plt.xlabel("Exp Number")
+    plt.ylabel("Latency (ms)")
+    plot_latency = plot_latency.get_figure()
+    plot_latency.savefig(figFolder + "latency.png")
+    plt.show()
     
     # Packet loss rate
+    packetLossList = np.array(packetLossList)
+    packetLossList = np.reshape(packetLossList, (1, len(packetLossList)))
+    packetLossList = pd.DataFrame(packetLossList)
+    plot_packetloss = sns.barplot(data=packetLossList)
+    plt.xlabel("Exp Number")
+    plt.ylabel("Packet loss rate (%)")
+    plot_packetloss = plot_packetloss.get_figure()
+    plot_packetloss.savefig(figFolder + "packetlossrate.png")
+    plt.show()
     
-    # RSSI
+    
     
     # SNR
-        
+    avgSnr = np.array(avgSnr)
+    avgSnr = np.reshape(avgSnr, (1, len(avgSnr)))
+    avgSnr = pd.DataFrame(avgSnr)
+    plot_snr = sns.barplot(data=avgSnr)
+    plt.xlabel("Exp Number")
+    plt.ylabel("SNR (dB)")
+    plot_snr = plot_snr.get_figure()
+    plot_snr.savefig(figFolder + "snr.png")
+    plt.show()
+    
+    # RSSI
+    avgRssiList = np.array(avgRssiList)
+    avgRssiList = np.reshape(avgRssiList, (1, len(avgRssiList)))
+    avgRssiList = pd.DataFrame(avgRssiList)
+    plot_rssi = sns.barplot(data=avgRssiList)
+    plt.xlabel("Exp Number")
+    plt.ylabel("RSSI (dBm)")
+    plt.ylim(min(avgRssiList), max(avgRssiList))
+    plot_rssi = plot_rssi.get_figure()
+    plot_rssi.savefig(figFolder + "rssi.png")
+    plt.show()
     
     
     
