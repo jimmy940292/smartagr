@@ -364,7 +364,7 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.yticks(fontsize=my_fontsize)
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
-    plt.ylabel(f'Packet loss rate (%)', fontsize=my_fontsize, labelpad=10, labelpad=10)
+    plt.ylabel(f'Packet loss rate (%)', fontsize=my_fontsize)
     plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "packetlossrate_line.svg", dpi=300, bbox_inches="tight")
