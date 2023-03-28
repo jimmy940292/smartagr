@@ -306,7 +306,7 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # Plot parameters
     figFolder = "fig/lora/"
     colors = ["blue", "red", "green", 'purple', 'brown']
-    x = [0, 2, 4, 6, 8, 10]
+    x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
@@ -325,16 +325,15 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # 2
     t2, l2, p2, r2, s2 = cal_10s_metric(senderLogFiles[2], receiverLogFiles[2], False)
     
-    
     # Throughput
-    plt.plot(t0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(t1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(t2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.xlim(-1, 10)
+    plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
-    plt.ylabel(f'Throughput (kbps)', fontsize=my_fontsize, labelpad=10)
+    plt.ylabel(f'Throughput (kbps)', fontsize=my_fontsize)
     plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "throughput_line.svg", dpi=300, bbox_inches="tight")
@@ -342,14 +341,14 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.clf()
     
     # Latency
-    plt.plot(l0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(l1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(l2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.xlim(-1, 10)
+    plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
-    plt.ylabel(f'Latency (ms)', fontsize=my_fontsize, labelpad=10)
+    plt.ylabel(f'Latency (ms)', fontsize=my_fontsize)
     plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "latency_line.svg", dpi=300, bbox_inches="tight")
@@ -358,14 +357,14 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     
     
     # Packet loss rate
-    plt.plot(p0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(p1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(p2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.xlim(-1, 10)
+    plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
-    plt.ylabel(f'Packet loss rate (%)', fontsize=my_fontsize, labelpad=10)
+    plt.ylabel(f'Packet loss rate (%)', fontsize=my_fontsize, labelpad=10, labelpad=10)
     plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "packetlossrate_line.svg", dpi=300, bbox_inches="tight")
@@ -373,14 +372,14 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.clf()
     
     # SNR
-    plt.plot(s0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(s1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(s2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.xlim(-1, 10)
+    plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
-    plt.ylabel(f'SNR (dB)', fontsize=my_fontsize, labelpad=10)
+    plt.ylabel(f'SNR (dB)', fontsize=my_fontsize)
     plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "snr_line.svg", dpi=300, bbox_inches="tight")
@@ -388,14 +387,14 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.clf()
     
     # RSSI
-    plt.plot(r0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(r1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(r2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.xlim(-1, 10)
+    plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
-    plt.ylabel(f'RSSI (dBm)', fontsize=my_fontsize, labelpad=10)
+    plt.ylabel(f'RSSI (dBm)', fontsize=my_fontsize)
     plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "rssi_line.svg", dpi=300, bbox_inches="tight")
