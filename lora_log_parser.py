@@ -7,11 +7,11 @@ import os
 import pandas as pd
 import matplotlib.ticker as ticker
 
-
-logFolderName = "results/D80_B20_S1_M29/"
+figFolder = "fig/M29/D160/lora/"
+logFolderName = "results/D160_B20_S1_M29/"
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
-figFolder = "fig/M29/D80/lora/"
+
 
 # Parameters
 my_fontsize = 110
@@ -66,6 +66,9 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
         p.snr = float(line.split(",")[4])
         receivePacket.append(p)
         
+    first_t = datetime.fromtimestamp(receivePacket[0].timeStamp)
+    last_t = datetime.fromtimestamp(receivePacket[len(receivePacket) - 1].timeStamp)
+    delta = (last_t - first_t).total_seconds() * 1000.0
     
     
     recvIndex = 0
@@ -75,10 +78,11 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
             lostPacket += 1
             continue
         else:
-            t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
-            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2) # Add time
-            delta = (t2 - t1).total_seconds() * 1000.0
-            throughputList.append(receivePacket[recvIndex].packetSize * 8.0 / 1000.0/ delta *1000.0) # kbps
+            # t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
+            # t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2) # Add time
+            # delta = (t2 - t1).total_seconds() * 1000.0
+            # throughputList.append(receivePacket[recvIndex].packetSize * 8.0 / 1000.0/ delta *1000.0) # kbps
+            throughputList.append(receivePacket[recvIndex].packetSize * 8.0 / 1000.0)
             latencyList.append(delta) # ms
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
@@ -86,7 +90,7 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
             
             
     # Calculate average metrics
-    avgThroughput = sum(throughputList) / len(throughputList)
+    avgThroughput = sum(throughputList) / delta * 1000.0
     avgLatency = sum(latencyList) / len(latencyList)
     avgRssi = sum(rssiList) / len(rssiList)
     avgSnr = sum(snrList) / len(snrList)
@@ -144,6 +148,11 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
         p.rssi = float(line.split(",")[3])
         p.snr = float(line.split(",")[4])
         receivePacket.append(p)
+        
+        
+    first_t = datetime.fromtimestamp(receivePacket[0].timeStamp)
+    last_t = datetime.fromtimestamp(receivePacket[len(receivePacket) - 1].timeStamp)
+    delta = (last_t - first_t).total_seconds() * 1000.0
 
     recvIndex = 0
     for i in range(len(sendPacket)):
@@ -152,11 +161,11 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
             lostPacket += 1
             continue
         else:
-            t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
-            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
-            delta = (t2 - t1).total_seconds() * 1000.0
+            # t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
+            # t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
+            # delta = (t2 - t1).total_seconds() * 1000.0
             throughputList.append(
-                receivePacket[recvIndex].packetSize * 8.0 / 1000.0 / delta * 1000.0)  # kbps
+                receivePacket[recvIndex].packetSize * 8.0 / 1000.0 /delta * 1000.0 * 100.0)  # kbps
             latencyList.append(delta)  # ms
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
@@ -200,23 +209,36 @@ def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
         p.rssi = float(line.split(",")[3])
         p.snr = float(line.split(",")[4])
         receivePacket.append(p)
+        
+    first_t = datetime.fromtimestamp(receivePacket[0].timeStamp)
+    last_t = datetime.fromtimestamp(
+        receivePacket[len(receivePacket) - 1].timeStamp)
+    delta = (last_t - first_t).total_seconds() * 1000.0
 
     recvIndex = 0
+    index = int(len(sendPacket) / 10)
+    loss_list = []
     for i in range(len(sendPacket)):
         # print("{} : {}".format(receivePacket[recvIndex].seq, sendPacket[i].seq))
         if (receivePacket[recvIndex].seq != sendPacket[i].seq):
             lostPacket += 1
             continue
         else:
-            t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
-            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
-            delta = (t2 - t1).total_seconds() * 1000.0
+            # t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
+            # t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
+            # delta = (t2 - t1).total_seconds() * 1000.0
             throughputList.append(
                 receivePacket[recvIndex].packetSize * 8.0 / 1000.0 / delta * 1000.0)  # kbps
+            # throughputList.append(
+            #     receivePacket[recvIndex].packetSize * 8.0 / 1000.0)  # kbps
             latencyList.append(delta)  # ms
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
             recvIndex += 1
+            
+        if(i % index == 9):
+            loss_list.append(lostPacket)
+            lostPacket = 0
       
     # Calculate average metrics in 10s
     avgThroughput = []
@@ -225,13 +247,14 @@ def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
     avgSnr = []
     packetLoss = []
     
-    index = int(len(sendPacket) / 10)
+    
     for i in range(index):
-        avgThroughput.append(sum(throughputList[i*10:i*10+9]) / len(throughputList[i*10:i*10+9]))
+        avgThroughput.append(sum(throughputList[i*10:i*10+9]) / len(throughputList[i*10:i*10+9]) * 100.0)
+        # avgThroughput.append(sum(throughputList[i*10:i*10+9]) * 10)
         avgLatency.append(sum(latencyList[i*10:i*10+9]) / len(latencyList[i*10:i*10+9]))
         avgRssi.append(sum(rssiList[i*10:i*10+9]) / len(rssiList[i*10:i*10+9]))
         avgSnr.append(sum(snrList[i*10:i*10+9]) / len(snrList[i*10:i*10+9]))
-        packetLoss.append((lostPacket / index) / len(throughputList[i*10:i*10+9]))
+        packetLoss.append((loss_list[i]) / len(throughputList[i*10:i*10+9]) * 10.0)
 
     senderLogFile.close()
     receiverLogFile.close()
@@ -475,6 +498,9 @@ def draw_bar(senderLogFiles, receiverLogFiles):
     plt.savefig(figFolder + "rssi_bar.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "rssi_bar.eps", dpi=300, bbox_inches="tight")
     plt.clf()
+    
+
+
 
 
 def draw_avg_line(senderLogFiles, receiverLogFiles):
@@ -482,7 +508,8 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     
     # Plot parameters
     
-    colors = ["blue", "red", "green", 'purple', 'brown']
+    # colors = ["blue", "red", "green", 'purple', 'brown']
+    colors = ["blue", "red", "green", 'purple', 'brown', 'orange', 'pink','gray','olive', 'cyan', 'darkblue','black']
     x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
@@ -502,16 +529,52 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # 2
     t2, l2, p2, r2, s2 = cal_10s_metric(senderLogFiles[2], receiverLogFiles[2], False)
     
+    # 3
+    t3, l3, p3, r3, s3 = cal_10s_metric(senderLogFiles[3], receiverLogFiles[3], False) 
+    
+    # # 4
+    t4, l4, p4, r4, s4 = cal_10s_metric(senderLogFiles[4], receiverLogFiles[4], False)
+    
+    # # 5
+    t5, l5, p5, r5, s5 = cal_10s_metric(senderLogFiles[5], receiverLogFiles[5], False)
+    
+    # # 6
+    t6, l6, p6, r6, s6 = cal_10s_metric(senderLogFiles[6], receiverLogFiles[6], False)
+    
+    # # 7
+    t7, l7, p7, r7, s7 = cal_10s_metric(senderLogFiles[7], receiverLogFiles[7], False)
+    
+    # # 8
+    t8, l8, p8, r8, s8 = cal_10s_metric(senderLogFiles[8], receiverLogFiles[8], False)
+    
+    # # 9
+    t9, l9, p9, r9, s9 = cal_10s_metric(senderLogFiles[9], receiverLogFiles[9], False)
+    
+    # # 10
+    t10, l10, p10, r10, s10 = cal_10s_metric(senderLogFiles[10], receiverLogFiles[10], False)
+    
+    # # 11
+    t11, l11, p11, r11, s11 = cal_10s_metric(senderLogFiles[11], receiverLogFiles[11], False)
+    
     # Throughput
-    plt.plot(x, t0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, t1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, t2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t0, color=colors[0], label="0", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t1, color=colors[1], label="1", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t2, color=colors[2], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t3, color=colors[3], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t4, color=colors[4], label="4", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t5, color=colors[5], label="5", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t6, color=colors[6], label="6", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t7, color=colors[7], label="7", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t8, color=colors[8], label="8", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t9, color=colors[9], label="9", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t10, color=colors[10], label="10", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, t11, color=colors[11], label="11", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'Throughput (kbps)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "throughput_line.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "throughput_line.eps", dpi=300, bbox_inches="tight")
@@ -520,13 +583,21 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # Latency
     plt.plot(x, l0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
     plt.plot(x, l1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, l2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l3, color=colors[3], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l4, color=colors[4], label="4", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l5, color=colors[5], label="5", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l6, color=colors[6], label="6", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l7, color=colors[7], label="7", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l8, color=colors[8], label="8", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l9, color=colors[9], label="9", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l10, color=colors[10], label="10", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, l11, color=colors[11], label="11", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'Latency (ms)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "latency_line.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "latency_line.eps", dpi=300, bbox_inches="tight")
@@ -536,13 +607,21 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # Packet loss rate
     plt.plot(x, p0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
     plt.plot(x, p1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, p2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p3, color=colors[3], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p4, color=colors[4], label="4", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p5, color=colors[5], label="5", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p6, color=colors[6], label="6", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p7, color=colors[7], label="7", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p8, color=colors[8], label="8", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p9, color=colors[9], label="9", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p10, color=colors[10], label="10", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, p11, color=colors[11], label="11", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'Packet loss rate (%)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "packetlossrate_line.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "packetlossrate_line.eps", dpi=300, bbox_inches="tight")
@@ -551,13 +630,21 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # SNR
     plt.plot(x, s0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
     plt.plot(x, s1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, s2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s3, color=colors[3], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s4, color=colors[4], label="4", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s5, color=colors[5], label="5", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s6, color=colors[6], label="6", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s7, color=colors[7], label="7", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s8, color=colors[8], label="8", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s9, color=colors[9], label="9", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s10, color=colors[10], label="10", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, s11, color=colors[11], label="11", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'SNR (dB)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "snr_line.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "snr_line.eps", dpi=300, bbox_inches="tight")
@@ -566,13 +653,21 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     # RSSI
     plt.plot(x, r0, color=colors[0], label="1", linestyle="--", marker=">", linewidth=10, markersize=80, markevery=1)
     plt.plot(x, r1, color=colors[1], label="2", linestyle="-", marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, r2, color=colors[2], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r3, color=colors[3], label="3", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r4, color=colors[4], label="4", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r5, color=colors[5], label="5", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r6, color=colors[6], label="6", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r7, color=colors[7], label="7", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r8, color=colors[8], label="8", linestyle="-.",marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r9, color=colors[9], label="9", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r10, color=colors[10], label="10", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
+    plt.plot(x, r11, color=colors[11], label="11", linestyle="-.", marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'RSSI (dBm)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=3, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.tight_layout()
     plt.savefig(figFolder + "rssi_line.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "rssi_line.eps", dpi=300, bbox_inches="tight")
