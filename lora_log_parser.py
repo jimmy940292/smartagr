@@ -8,16 +8,17 @@ import pandas as pd
 import matplotlib.ticker as ticker
 
 
-logFolderName = "example_data/"
+logFolderName = "results/D160_B20_S1_M29/"
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
+figFolder = "fig/M29/D160/lora/"
 
 # Parameters
 my_fontsize = 110
 my_figsize = (30, 22)
 my_rotation = 45
 tick_coe = 1
-width = 0.8
+width = 0.6
 
 class PacketLog():
     
@@ -75,7 +76,7 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
             continue
         else:
             t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
-            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp)
+            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2) # Add time
             delta = (t2 - t1).total_seconds() * 1000.0
             throughputList.append(receivePacket[recvIndex].packetSize * 8.0 / 1000.0/ delta *1000.0) # kbps
             latencyList.append(delta) # ms
@@ -109,6 +110,62 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
     
     
     return avgThroughput, avgLatency, packetLoss, avgRssi, avgSnr
+
+
+def cal_metric(senderLogFile, receiverLogFile, doprint=True):
+    # Variable
+    sendPacketNumber = 0
+    lostPacket = 0
+    sendPacket = []
+    receivePacket = []
+    throughputList = []
+    latencyList = []
+    rssiList = []
+    snrList = []
+
+    # Read sender log file
+    for line in senderLogFile:
+        if (line == ""):
+            break
+        p = PacketLog()
+        p.seq = int(line.split(",")[0])
+        p.packetSize = int(line.split(",")[1])
+        p.timeStamp = float(line.split(",")[2])
+        sendPacket.append(p)
+
+    # Read receiver log file:
+    for line in receiverLogFile:
+        if (line == ""):
+            break
+        p = PacketLog()
+        p.seq = int(line.split(",")[0])
+        p.packetSize = int(line.split(",")[1])
+        p.timeStamp = float(line.split(",")[2])
+        p.rssi = float(line.split(",")[3])
+        p.snr = float(line.split(",")[4])
+        receivePacket.append(p)
+
+    recvIndex = 0
+    for i in range(len(sendPacket)):
+        # print("{} : {}".format(receivePacket[recvIndex].seq, sendPacket[i].seq))
+        if (receivePacket[recvIndex].seq != sendPacket[i].seq):
+            lostPacket += 1
+            continue
+        else:
+            t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
+            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
+            delta = (t2 - t1).total_seconds() * 1000.0
+            throughputList.append(
+                receivePacket[recvIndex].packetSize * 8.0 / 1000.0 / delta * 1000.0)  # kbps
+            latencyList.append(delta)  # ms
+            rssiList.append(receivePacket[recvIndex].rssi)
+            snrList.append(receivePacket[recvIndex].snr)
+            recvIndex += 1
+
+    senderLogFile.close()
+    receiverLogFile.close()
+
+    return throughputList, latencyList, lostPacket, rssiList, snrList
 
 
 def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
@@ -152,7 +209,7 @@ def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
             continue
         else:
             t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
-            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp)
+            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
             delta = (t2 - t1).total_seconds() * 1000.0
             throughputList.append(
                 receivePacket[recvIndex].packetSize * 8.0 / 1000.0 / delta * 1000.0)  # kbps
@@ -207,7 +264,6 @@ def draw_avg_bar(senderLogFiles, receiverLogFiles):
     avgSnrList.append(sum(avgSnrList)/len(avgSnrList))
         
     # Draw Fig
-    figFolder = "fig/lora/"
     colors = ["blue", "red", "green", 'purple', 'brown']
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
@@ -300,11 +356,132 @@ def draw_avg_bar(senderLogFiles, receiverLogFiles):
     plt.clf()
 
 
+def draw_bar(senderLogFiles, receiverLogFiles):
+
+    ThroughputList = []
+    LatencyList = []
+    packetLossList = []
+    RssiList = []
+    SnrList = []
+
+    for i in range(len(senderLogFiles)):
+        t, l, p, r, s = cal_metric(
+            senderLogFiles[i], receiverLogFiles[i], False)
+        ThroughputList.append(t)
+        LatencyList.append(l)
+        packetLossList.append(p)
+        RssiList.append(r)
+        SnrList.append(s)
+
+
+    # Draw Fig
+    colors = ["blue", "red", "green", 'purple', 'brown']
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
+    # Label
+    labels = []
+    for i in range(len(ThroughputList)):
+        labels.append(str(i))
+    labels.append("Avg")
+
+    x = []
+    for i in range(len(labels)):
+        x.append(i)
+
+    # Throughput
+    ThroughputList = pd.DataFrame(ThroughputList)
+    ThroughputList = ThroughputList.T
+    # ThroughputList['Avg'] = (ThroughputList[0]+ ThroughputList[1] + ThroughputList[2]) / 3
+    ThroughputList['Avg'] = (ThroughputList[0]+ ThroughputList[1] + ThroughputList[2] + ThroughputList[3] + ThroughputList[4] + ThroughputList[5] + ThroughputList[6] + ThroughputList[7] + ThroughputList[8] + ThroughputList[9] + ThroughputList[10] + ThroughputList[11]) / 12
+    plot_throughput = sns.barplot(
+        data=ThroughputList, palette=colors, width=width, errorbar=('ci', 95), errwidth=20)
+    plt.xlabel("Run", fontsize=my_fontsize)
+    plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
+    plt.xticks(x, labels, fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.savefig(figFolder + "throughput_bar.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_bar.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # # Latency
+    LatencyList = pd.DataFrame(LatencyList)
+    LatencyList = LatencyList.T
+    # LatencyList['Avg'] = (LatencyList[0] + LatencyList[1] + LatencyList[2]) / 3
+    LatencyList['Avg'] = (LatencyList[0] + LatencyList[1] + LatencyList[2] + LatencyList[3] + LatencyList[4] + LatencyList[5] +
+                          LatencyList[6] + LatencyList[7] + LatencyList[8] + LatencyList[9] + LatencyList[10] + LatencyList[11]) / 12
+    plot_latency = sns.barplot(
+        data=LatencyList, palette=colors, width=width, errorbar=('ci', 95), errwidth=20)
+    plt.xlabel("Run", fontsize=my_fontsize)
+    plt.ylabel("Latency (ms)", fontsize=my_fontsize)
+    plt.xticks(x, labels, fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.savefig(figFolder + "latency_bar.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "latency_bar.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Packet loss rate
+    packetLossList = pd.DataFrame(packetLossList)
+    packetLossList = packetLossList.T
+    # packetLossList['Avg'] = (packetLossList[0] + packetLossList[1] + packetLossList[2]) / 3
+    packetLossList['Avg'] = (packetLossList[0] + packetLossList[1] + packetLossList[2] + packetLossList[3] + packetLossList[4] + packetLossList[5] +
+                             packetLossList[6] + packetLossList[7] + packetLossList[8] + packetLossList[9] + packetLossList[10] + packetLossList[11]) / 12
+    plot_packetloss = sns.barplot(
+        data=packetLossList, palette=colors, width=width, errorbar=('ci', 95), errwidth=20)
+    plt.xlabel("Run", fontsize=my_fontsize)
+    plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
+    plt.xticks(x, labels, fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.ylim(0.0, 100.0)
+    plt.savefig(figFolder + "packetlossrate_bar.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "packetlossrate_bar.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # SNR
+    SnrList = pd.DataFrame(SnrList)
+    SnrList = SnrList.T
+    # SnrList['Avg'] = (SnrList[0] + SnrList[1] + SnrList[2]) / 3
+    SnrList['Avg'] = (SnrList[0] + SnrList[1] + SnrList[2] + SnrList[3] + SnrList[4] + SnrList[5] +
+                      SnrList[6] + SnrList[7] + SnrList[8] + SnrList[9] + SnrList[10] + SnrList[11]) / 12
+    plot_snr = sns.barplot(data=SnrList, palette=colors,
+                           width=width, errorbar=('ci', 95), errwidth=20)
+    plt.xlabel("Run", fontsize=my_fontsize)
+    plt.ylabel("SNR (dB)", fontsize=my_fontsize)
+    plt.xticks(x, labels, fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.savefig(figFolder + "snr_bar.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "snr_bar.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # RSSI
+    newRssiList = RssiList
+    RssiList = pd.DataFrame(RssiList)
+    RssiList = RssiList.T
+    # RssiList['Avg'] = (RssiList[0] + RssiList[1] + RssiList[2]) / 3
+    RssiList['Avg'] = (RssiList[0] + RssiList[1] + RssiList[2] + RssiList[3] + RssiList[4] + RssiList[5] +
+                       RssiList[6] + RssiList[7] + RssiList[8] + RssiList[9] + RssiList[10] + RssiList[11]) / 12
+    plot_rssi = sns.barplot(data=RssiList, palette=colors,
+                            width=width, errorbar=('ci', 95), errwidth=20)
+    plt.xlabel("Run", fontsize=my_fontsize)
+    plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
+    plt.xticks(x, labels, fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.ylim(RssiList.min(), 0)
+    plt.savefig(figFolder + "rssi_bar.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rssi_bar.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+
 def draw_avg_line(senderLogFiles, receiverLogFiles):
     
     
     # Plot parameters
-    figFolder = "fig/lora/"
+    
     colors = ["blue", "red", "green", 'purple', 'brown']
     x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
@@ -427,11 +604,14 @@ if __name__ == "__main__":
             senderLogFiles.append(s_file)
             receiverLogFiles.append(r_file)
         
+            # cal_avg_metric(s_file, r_file, True)
         # Bar
         # draw_avg_bar(senderLogFiles, receiverLogFiles)
+        draw_bar(senderLogFiles, receiverLogFiles)
+        
         
         # Line
-        draw_avg_line(senderLogFiles, receiverLogFiles)
+        # draw_avg_line(senderLogFiles, receiverLogFiles)
     else:
         # Open log files
         senderLogFile = open(logFolderName + senderLogFileName + "_" + str(args.expNumber) + ".log", "r")

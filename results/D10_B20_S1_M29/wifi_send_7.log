@@ -1,0 +1,28 @@
+------------------------------------------------------------
+Client connecting to 192.168.1.6, UDP port 5001
+UDP buffer size:  176 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.1.5 port 42519 connected with 192.168.1.6 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3] 0.0000-10.1912 sec  1.14 MBytes   939 Kbits/sec
+[  3] Sent 0 datagrams
+[  3] Server Report:
+[ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
+[  3] 0.0000-10.2063 sec  1.08 MBytes   888 Kbits/sec  74.878 ms   43/  815 (5.3%)
+
+PING 192.168.1.6 (192.168.1.6) 56(84) bytes of data.
+64 bytes from 192.168.1.6: icmp_seq=1 ttl=64 time=0.826 ms
+64 bytes from 192.168.1.6: icmp_seq=2 ttl=64 time=0.696 ms
+64 bytes from 192.168.1.6: icmp_seq=3 ttl=64 time=0.713 ms
+64 bytes from 192.168.1.6: icmp_seq=4 ttl=64 time=0.837 ms
+64 bytes from 192.168.1.6: icmp_seq=6 ttl=64 time=0.663 ms
+64 bytes from 192.168.1.6: icmp_seq=7 ttl=64 time=0.675 ms
+64 bytes from 192.168.1.6: icmp_seq=8 ttl=64 time=0.624 ms
+64 bytes from 192.168.1.6: icmp_seq=10 ttl=64 time=1.00 ms
+
+--- 192.168.1.6 ping statistics ---
+10 packets transmitted, 8 received, 20% packet loss, time 9351ms
+rtt min/avg/max/mdev = 0.624/0.754/1.003/0.117 ms
+
+Signal strength: -19 dBm
+SNR: None dB
