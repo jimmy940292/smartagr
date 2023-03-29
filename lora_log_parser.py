@@ -8,10 +8,10 @@ import pandas as pd
 import matplotlib.ticker as ticker
 
 
-logFolderName = "results/D160_B20_S1_M29/"
+logFolderName = "results/D80_B20_S1_M29/"
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
-figFolder = "fig/M29/D160/lora/"
+figFolder = "fig/M29/D80/lora/"
 
 # Parameters
 my_fontsize = 110
