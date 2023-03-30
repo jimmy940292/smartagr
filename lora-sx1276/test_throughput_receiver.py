@@ -56,6 +56,7 @@ class LoRaRcvCont(LoRa):
         self.testTime = 30
         self.startTime = None
         self.ntpOffset = None
+        self.RttMode = False
         
     def read_packet_payload(self, data):
         
@@ -69,7 +70,7 @@ class LoRaRcvCont(LoRa):
         return ''.join(seq_data)
 
     def send_packet(self, packet):
-        self.set_mode(MODE.STDBY)
+        # self.set_mode(MODE.STDBY)
         # print("Send: {}".format(packet))
         data = [int(hex(ord(c)), 0) for c in packet]
         self.write_payload(data)
@@ -85,41 +86,37 @@ class LoRaRcvCont(LoRa):
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
         payload = self.read_payload(nocheck=True)
-        # data = ''.join([chr(c) for c in payload])
         
         # Read payload
         data = self.read_packet_payload(payload)
-        
         # print("Packet: {}".format(data))
         # print("RSSI: {}".format(self.get_rssi_value()))
         # print("SNR: {}".format(self.get_pkt_snr_value()))
         
+        # Write
         rssi = self.get_rssi_value()
         snr = self.get_pkt_snr_value()
-        
-        # Write
-        
         self.logfile.write(str(data) + "," + str(len(payload)) + "," + str(receiveTime) + "," + str(rssi) + "," + str(snr) + "\n")
         
-        # # Change to TX
-        # #print(bytes(payload).decode())
-        # BOARD.led_off()
-        # self.set_dio_mapping([1,0,0,0,0,0])
-        # self.set_mode(MODE.STDBY)
-        # # sleep(0.01)
-        # self.clear_irq_flags(TxDone=1)
-        # self.send_packet(data)        
         
-        # self.set_mode(MODE.RXCONT)
+        if(self.RttMode):
+            # Change to TX
+            self.set_dio_mapping([1,0,0,0,0,0])
+            # self.set_mode(MODE.STDBY)
+            # sleep(0.01)
+            self.clear_irq_flags(TxDone=1)
+            self.send_packet(data)
 
     def on_tx_done(self):
         print("\nTxDone")
         # # print(self.get_irq_flags())
-        # self.set_dio_mapping([0,0,0,0,0,0])
-        # # sleep(0.01)
-        # self.reset_ptr_rx()
-        # self.set_mode(MODE.RXCONT)
-        # self.clear_irq_flags(RxDone=1)
+        
+        if(self.RttMode):
+            self.set_dio_mapping([0,0,0,0,0,0])
+            # # sleep(0.01)
+            self.reset_ptr_rx()
+            self.set_mode(MODE.RXCONT)
+            self.clear_irq_flags(RxDone=1)
         
 
     def on_cad_done(self):
@@ -177,10 +174,12 @@ if __name__ == "__main__":
     parser.add_argument("--txpower", type=float, default=15)
     parser.add_argument("--logFileName", type=str, default="lora_recv.log")
     parser.add_argument("--logFilePath", type=str, default="/home/rpiplus/smartagr/lora-sx1276/log/")
+    parser.add_argument("--rtt", type=bool, default=False)
     args = parser.parse_args()
     
     
     lora = LoRaRcvCont(verbose=False)
+    lora.RttMode = args.rtt
     # args = parser.parse_args(lora)
 
     # Setting

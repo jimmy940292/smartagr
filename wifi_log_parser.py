@@ -8,8 +8,8 @@ import pandas as pd
 import re
 import matplotlib.ticker as ticker
 
-figFolder = "fig/M29/D10/wifi/"
-logFolderName = "results/D10_B20_S1_M29/"
+figFolder = "fig/M29/D80/wifi/"
+logFolderName = "results/D80_B20_S1_M29/"
 senderLogFileName = "wifi_send"
 
 # Parameters
@@ -49,7 +49,7 @@ def parse_log_from_file(senderLogFile):
             break
     
     # Packet loss rate (Mb)
-    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ MBytes\s*\d+.\d+ Mbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+ \(([\d]+|[\d+.\d+])%\)"
+    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*\d+.\d+ Mbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+\s*\((\d+|\d+.\d+)%\)"
     packetlossrate = 0.0
     for i, line in enumerate(open(senderLogFile, 'r')):
         if (re.match(pattern, line)):
@@ -57,7 +57,7 @@ def parse_log_from_file(senderLogFile):
             break
         
     # Packet loss rate (Kb)
-    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ KBytes\s*\d+.\d+ Kbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+ \(([\d]+|[\d+.\d+])%\)"
+    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*\d+.\d+ Kbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+\s*\((\d+|\d+.\d+)%\)"
     for i, line in enumerate(open(senderLogFile, 'r')):
         if (re.match(pattern, line)):
             packetlossrate = float(re.match(pattern, line).group(1))
@@ -164,7 +164,7 @@ def draw_avg_bar(senderLogFiles):
     plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.ylim(0.0, 100.0)
+    # plt.ylim(0.0, 100.0)
     plt.savefig(figFolder + "packetlossrate_bar.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "packetlossrate_bar.eps",

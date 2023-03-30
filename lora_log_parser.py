@@ -90,7 +90,7 @@ def cal_avg_metric(senderLogFile, receiverLogFile, doprint = True):
             
             
     # Calculate average metrics
-    avgThroughput = sum(throughputList) / delta * 1000.0
+    avgThroughput = sum(throughputList) / 10.0
     avgLatency = sum(latencyList) / len(latencyList)
     avgRssi = sum(rssiList) / len(rssiList)
     avgSnr = sum(snrList) / len(snrList)
@@ -165,7 +165,7 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
             # t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
             # delta = (t2 - t1).total_seconds() * 1000.0
             throughputList.append(
-                receivePacket[recvIndex].packetSize * 8.0 / 1000.0 /delta * 1000.0 * 100.0)  # kbps
+                receivePacket[recvIndex].packetSize * 8.0 / 1000.0)  # kbps
             latencyList.append(delta)  # ms
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
@@ -174,7 +174,7 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
     senderLogFile.close()
     receiverLogFile.close()
 
-    return throughputList, latencyList, lostPacket, rssiList, snrList
+    return throughputList / 10.0, latencyList, lostPacket, rssiList, snrList
 
 
 def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):

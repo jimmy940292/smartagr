@@ -61,7 +61,7 @@ def parse_log_from_file(senderLogFile):
             break
 
     # Packet loss rate (Mb)
-    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ MBytes\s*\d+.\d+ Mbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+ \(([\d]+|[\d+.\d+])%\)"
+    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*\d+.\d+ Mbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+\s*\((\d+|\d+.\d+)%\)"
     packetlossrate = 0.0
     for i, line in enumerate(open(senderLogFile, 'r')):
         if (re.match(pattern, line)):
@@ -69,7 +69,7 @@ def parse_log_from_file(senderLogFile):
             break
 
     # Packet loss rate (Kb)
-    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ KBytes\s*\d+.\d+ Kbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+ \(([\d]+|[\d+.\d+])%\)"
+    pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*\d+.\d+ Kbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+\s*\((\d+|\d+.\d+)%\)"
     for i, line in enumerate(open(senderLogFile, 'r')):
         if (re.match(pattern, line)):
             packetlossrate = float(re.match(pattern, line).group(1))

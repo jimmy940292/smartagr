@@ -93,7 +93,8 @@ if __name__ == '__main__':
     tx_power = 30
     iperf_time = 10
     iperf_bandwidth = 1 # Mb
-    ping_times = 10
+    ping_time = 10
+    packet_size = 100
     
     # Get current time
     now = datetime.datetime.now()
@@ -114,7 +115,7 @@ if __name__ == '__main__':
     for i in range(test_runs):
         
         # Throughput
-        result = subprocess.run(["iperf", "-B", client_ip,  "-c", server_ip, "-t", str(iperf_time), "-u", "-b", str(iperf_bandwidth) + "M"], stdout=subprocess.PIPE)
+        result = subprocess.run(["iperf", "-B", client_ip,  "-c", server_ip, "-t", str(iperf_time), "-u", "-b", str(iperf_bandwidth) + "M", "-l", str(packet_size) + "B", "-i", str(1)], stdout=subprocess.PIPE)
         print("Round {}\n".format(str(i)))
         s = result.stdout.decode("utf-8")
         print(s)
@@ -122,7 +123,7 @@ if __name__ == '__main__':
         output_file.write("\n")
         
         # Latency, Packet loss rate
-        result = subprocess.run(["ping", "-c", str(ping_times), server_ip],  stdout=subprocess.PIPE)
+        result = subprocess.run(["ping", "-w", str(ping_time), "-i", "0.2", "-s", "packet_size",server_ip],  stdout=subprocess.PIPE)
         print("Round {}\n".format(str(i)))
         s = result.stdout.decode("utf-8")
         print(s)

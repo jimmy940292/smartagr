@@ -72,6 +72,7 @@ class LoRaBeacon(LoRa):
         self.txpower = 0.0
         self.expNumber = 0
         self.data = []
+        self.RttMode = False
         
         
     def set_packet_payload(self, seq):
@@ -88,11 +89,9 @@ class LoRaBeacon(LoRa):
         # return data
         
     def send_packet(self, seq):
-        # self.set_mode(MODE.STDBY)
         # print("Send: {}".format(packet))
         
         
-        # print("Packet: {}".format(seq))
         self.set_packet_payload(seq)
         
         
@@ -107,11 +106,9 @@ class LoRaBeacon(LoRa):
         self.write_payload(self.data)
         self.set_mode(MODE.TX)
         
-        # self.sendTime = time.time() + self.ntpOffset
+        # Write
         self.sendTime = time.time()
-        # Write 
         self.logfile.write(str(self.sequenceNumber) + "," + str(len(self.data)) + "," + str(self.sendTime) + "\n")
-        
         self.sentPacket +=1
         self.sequenceNumber +=1
         
@@ -126,45 +123,44 @@ class LoRaBeacon(LoRa):
         
         # self.throughputList[self.sentPacket -1] = self.packetSize / (self.receiveTime - self.sendTime)
         
-        # # # BOARD.led_on()
-        # # print("\nRxDone")
-        # # # self.clear_irq_flags(RxDone=1)
         # # payload = self.read_payload(nocheck=True)
         # # data = ''.join([chr(c) for c in payload])
         # # print("Packet: {}".format(data))
         # # print("RSSI: {}".format(self.get_rssi_value()))
         # # print("SNR: {}".format(self.get_pkt_snr_value()))
         # # print()
-        
-        
         # # self.end()
                 
-        # # Change to TX
-        # # BOARD.led_off()
-        # self.set_dio_mapping([1,0,0,0,0,0])    # TX
-        # self.set_mode(MODE.STDBY)
-        # # sleep(5)
-        # self.clear_irq_flags(TxDone=1)
-        # data = "ABCD"
-        # self.send_packet(data)
+        if(self.RttMode):
+            # # Change to TX
+            self.set_dio_mapping([1,0,0,0,0,0])    # TX
+            # self.set_mode(MODE.STDBY)
+            self.clear_irq_flags(TxDone=1)
+            if (self.sentPacket < self.numberofPackets):
+                self.send_packet(str(self.sequenceNumber))
+            else:
+                self.end()
 
     def on_tx_done(self):
         # global args
         # print("\nTxDone")
         # self.set_mode(MODE.STDBY)
-        self.clear_irq_flags(TxDone=1)
+        
         # time.sleep(self.intervalTime)
         
-        if(self.sentPacket < self.numberofPackets):
-            self.send_packet(str(self.sequenceNumber))
+        if(self.RttMode):
+            # # Change to RX
+            self.set_dio_mapping([0,0,0,0,0,0])    # RX
+            # sleep(0.01)
+            self.reset_ptr_rx()
+            self.set_mode(MODE.RXCONT)
+            self.clear_irq_flags(RxDone=1)
         else:
-            self.end()
-        # # Change to RX
-        # self.set_dio_mapping([0,0,0,0,0,0])    # RX
-        # # sleep(0.01)
-        # self.reset_ptr_rx()
-        # self.set_mode(MODE.RXCONT)
-        # self.clear_irq_flags(RxDone=1)
+            self.clear_irq_flags(TxDone=1)
+            if(self.sentPacket < self.numberofPackets):
+                self.send_packet(str(self.sequenceNumber))
+            else:
+                self.end()
         
         
 
@@ -245,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument("--logFileName", type=str, default="lora_send")
     parser.add_argument("--logFilePath", type=str, default="/home/rpi/smartagr/lora-sx1276/log/")
     parser.add_argument("--expNumber", type=int, default=0)
+    parser.add_argument("--rtt", type=bool, default=False)
     args = parser.parse_args()
     
     lora = LoRaBeacon(verbose=False)
@@ -255,6 +252,7 @@ if __name__ == "__main__":
     lora.logFileName = args.logFileName
     lora.logFilePath = args.logFilePath
     lora.expNumber = args.expNumber
+    lora.RttMode = args.rtt
     
     
     
@@ -303,29 +301,3 @@ if __name__ == "__main__":
     # Start
     lora.start()
     
-
-
-
-# print(lora)
-# #assert(lora.get_lna()['lna_gain'] == GAIN.NOT_USED)
-# assert(lora.get_agc_auto_on() == 1)
-
-# print("Beacon config:")
-# print("  Wait %f s" % args.wait)
-# print("  Single tx = %s" % args.single)
-# print("")
-# try: input("Press enter to start...")
-# except: pass
-
-# try:
-#     lora.start()
-# except KeyboardInterrupt:
-#     sys.stdout.flush()
-#     # print("")
-#     sys.stderr.write("KeyboardInterrupt\n")
-# finally:
-#     sys.stdout.flush()
-#     # print("")
-#     lora.set_mode(MODE.SLEEP)
-#     # print(lora)
-#     BOARD.teardown()

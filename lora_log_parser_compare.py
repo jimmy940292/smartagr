@@ -91,7 +91,7 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
     senderLogFile.close()
     receiverLogFile.close()
 
-    return throughputList, latencyList, lostPacket, rssiList, snrList
+    return throughputList, latencyList, lostPacket , rssiList, snrList
 
 
 def draw_compare_line(expNumber):
