@@ -109,7 +109,7 @@ if __name__ == '__main__':
     loss_rate = []
     
     # Set TX power
-    os.system("sudo iwconfig wlan1 txpower " + str(tx_power) )
+    os.system("sudo iwconfig wlan1 txpower " + str(1) )
     
     
     for i in range(test_runs):

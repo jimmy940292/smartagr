@@ -29,10 +29,16 @@ logFolderPath = "smartagr/lora-sx1276/log/"
 currentLogPath = "log/"
 
 
-def test_wifi(exp_number):
+def test_wifi(exp_number, tx_power):
     
     # Delete old log
     os.system(senderp + "ssh -t " + senderHostName + "@" + senderIP + " " + " rm /home/rpi/smartagr/wifi_log/*.log")
+    
+    # tx power
+    os.system(senderp + "ssh -t " + senderHostName + "@" + senderIP + " " + " sudo iwconfig wlan1 txpower " + str(tx_power))
+    
+    os.system(receiverp + "ssh -t " + receiverHostName + "@" + receiverIP + " " + " sudo iwconfig wlan1 txpower " + str(tx_power))
+    
     
     for i in range(exp_number + 1):
         # WiFi
@@ -55,7 +61,7 @@ def test_wifi(exp_number):
         ":/home/rpi/smartagr/wifi_log/*.log " + " log/"
     os.system(senderp + clientCommand)
         
-def test_lora(exp_number):
+def test_lora(exp_number, tx_power):
     
     # Delete old log
     os.system(senderp + "ssh -t " + senderHostName + "@" + senderIP + " " + " rm /home/rpi/smartagr/lora-sx1276/log/*.log")
@@ -95,13 +101,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     exp_number = args.expNumber
+    tx_power = args.txpower
     
     
     # Lora
-    test_lora(exp_number)
+    test_lora(exp_number, tx_power)
     
     # WiFi
-    test_wifi(exp_number)
+    test_wifi(exp_number, tx_power)
     
     # # Run log parser
     # print()

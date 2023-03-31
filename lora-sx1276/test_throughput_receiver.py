@@ -29,7 +29,6 @@ import sys
 import socket
 import struct 
 import time
-import ntplib
 from datetime import datetime
 import argparse
 import os
@@ -53,10 +52,8 @@ class LoRaRcvCont(LoRa):
         
         # Variable
         self.logfile = None
-        self.testTime = 30
+        self.testTime = 10
         self.startTime = None
-        self.ntpOffset = None
-        self.RttMode = False
         
     def read_packet_payload(self, data):
         
@@ -80,7 +77,7 @@ class LoRaRcvCont(LoRa):
         
     def on_rx_done(self):
         
-        receiveTime = time.time() + self.ntpOffset
+        receiveTime = time.time()
         # print("\nRxDone")
         self.clear_irq_flags(RxDone=1)
         self.reset_ptr_rx()
@@ -99,24 +96,10 @@ class LoRaRcvCont(LoRa):
         self.logfile.write(str(data) + "," + str(len(payload)) + "," + str(receiveTime) + "," + str(rssi) + "," + str(snr) + "\n")
         
         
-        if(self.RttMode):
-            # Change to TX
-            self.set_dio_mapping([1,0,0,0,0,0])
-            # self.set_mode(MODE.STDBY)
-            # sleep(0.01)
-            self.clear_irq_flags(TxDone=1)
-            self.send_packet(data)
 
     def on_tx_done(self):
         print("\nTxDone")
         # # print(self.get_irq_flags())
-        
-        if(self.RttMode):
-            self.set_dio_mapping([0,0,0,0,0,0])
-            # # sleep(0.01)
-            self.reset_ptr_rx()
-            self.set_mode(MODE.RXCONT)
-            self.clear_irq_flags(RxDone=1)
         
 
     def on_cad_done(self):
@@ -148,10 +131,11 @@ class LoRaRcvCont(LoRa):
         exit()
 
     def start(self):
+        global args
         self.reset_ptr_rx()
         self.set_mode(MODE.RXCONT)
         
-        self.logfile = open( args.logFilePath + args.logFileName, "w")
+        self.logfile = open( args.logFilePath + args.logFileName + "_" + str(args.expNumber) + ".log", "w")
         self.startTime = datetime.now()
         
         while True:
@@ -160,7 +144,7 @@ class LoRaRcvCont(LoRa):
             if( s > self.testTime):
                 self.end()
             else:
-                time.sleep(0.1)
+                time.sleep(0.01)
             # rssi_value = self.get_rssi_value()
             # status = self.get_modem_status()
             # sys.stdout.flush()
@@ -172,14 +156,13 @@ if __name__ == "__main__":
     # Args parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--txpower", type=float, default=15)
-    parser.add_argument("--logFileName", type=str, default="lora_recv.log")
+    parser.add_argument("--logFileName", type=str, default="lora_recv")
     parser.add_argument("--logFilePath", type=str, default="/home/rpiplus/smartagr/lora-sx1276/log/")
-    parser.add_argument("--rtt", type=bool, default=False)
+    parser.add_argument("--expNumber", type=int, default=0)
     args = parser.parse_args()
     
     
     lora = LoRaRcvCont(verbose=False)
-    lora.RttMode = args.rtt
     # args = parser.parse_args(lora)
 
     # Setting
@@ -209,13 +192,13 @@ if __name__ == "__main__":
     #lora.set_agc_auto_on(True)
     
     # Synchronize timestamp
-    ntp_client = ntplib.NTPClient()
-    # response = ntp_client.request("pool.ntp.org")
-    response = ntp_client.request("192.168.0.70")
-    ntp_timestamp = response.tx_time
+    # ntp_client = ntplib.NTPClient()
+    # # response = ntp_client.request("pool.ntp.org")
+    # response = ntp_client.request("192.168.0.70")
+    # ntp_timestamp = response.tx_time
     
-    local_time = time.time()
-    lora.ntpOffset = ntp_timestamp - local_time
+    # local_time = time.time()
+    # lora.ntpOffset = ntp_timestamp - local_time
     
     # Start
     lora.start()

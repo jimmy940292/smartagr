@@ -76,7 +76,7 @@ def setter(register_address):
 
 class LoRa(object):
 
-    spi = BOARD.SpiDev()              # init and get the baord's SPI
+    spi = BOARD.SpiDev()              # init and get the baord's SPIf
     mode = None                       # the mode is backed up here
     backup_registers = []
     verbose = True
@@ -857,7 +857,7 @@ class LoRa(object):
         self.set_freq(freq_bkup)
 
     def dump_registers(self):
-        """ Returns a list of [reg_addr, reg_name, reg_value] tuples. Chip is put into mode SLEEP.
+        """ Returns a list of [reg_addr, reg_name, reg_value] tuples. Chip is put into mode SLEEP. 
         :return: List of [reg_addr, reg_name, reg_value] tuples
         :rtype: list[tuple]
         """

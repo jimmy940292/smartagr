@@ -72,7 +72,6 @@ class LoRaBeacon(LoRa):
         self.txpower = 0.0
         self.expNumber = 0
         self.data = []
-        self.RttMode = False
         
         
     def set_packet_payload(self, seq):
@@ -131,15 +130,6 @@ class LoRaBeacon(LoRa):
         # # print()
         # # self.end()
                 
-        if(self.RttMode):
-            # # Change to TX
-            self.set_dio_mapping([1,0,0,0,0,0])    # TX
-            # self.set_mode(MODE.STDBY)
-            self.clear_irq_flags(TxDone=1)
-            if (self.sentPacket < self.numberofPackets):
-                self.send_packet(str(self.sequenceNumber))
-            else:
-                self.end()
 
     def on_tx_done(self):
         # global args
@@ -147,23 +137,15 @@ class LoRaBeacon(LoRa):
         # self.set_mode(MODE.STDBY)
         
         # time.sleep(self.intervalTime)
-        
-        if(self.RttMode):
-            # # Change to RX
-            self.set_dio_mapping([0,0,0,0,0,0])    # RX
-            # sleep(0.01)
-            self.reset_ptr_rx()
-            self.set_mode(MODE.RXCONT)
-            self.clear_irq_flags(RxDone=1)
+        self.clear_irq_flags(TxDone=1)
+        if (self.sentPacket < self.numberofPackets):
+            self.send_packet(str(self.sequenceNumber))
         else:
-            self.clear_irq_flags(TxDone=1)
-            if(self.sentPacket < self.numberofPackets):
-                self.send_packet(str(self.sequenceNumber))
-            else:
-                self.end()
-        
-        
+            self.end()
 
+            
+        
+    
     def on_cad_done(self):
         print("\non_CadDone")
         print(self.get_irq_flags())
@@ -241,7 +223,6 @@ if __name__ == "__main__":
     parser.add_argument("--logFileName", type=str, default="lora_send")
     parser.add_argument("--logFilePath", type=str, default="/home/rpi/smartagr/lora-sx1276/log/")
     parser.add_argument("--expNumber", type=int, default=0)
-    parser.add_argument("--rtt", type=bool, default=False)
     args = parser.parse_args()
     
     lora = LoRaBeacon(verbose=False)
@@ -251,12 +232,7 @@ if __name__ == "__main__":
     lora.txpower = args.txpower
     lora.logFileName = args.logFileName
     lora.logFilePath = args.logFilePath
-    lora.expNumber = args.expNumber
-    lora.RttMode = args.rtt
-    
-    
-    
-    
+    lora.expNumber = args.expNumber 
     
 
     # Setting
@@ -296,7 +272,7 @@ if __name__ == "__main__":
     # lora.ntpOffset = ntp_timestamp - local_time
     
     # Set data
-    lora.data = list([int(hex(ord('a')), 0)] * lora.packetSize)
+    # lora.data = list([int(hex(ord('a')), 0)] * lora.packetSize)
     
     # Start
     lora.start()

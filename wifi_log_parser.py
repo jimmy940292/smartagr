@@ -8,9 +8,11 @@ import pandas as pd
 import re
 import matplotlib.ticker as ticker
 
-figFolder = "fig/M29/D80/wifi/"
-logFolderName = "results/D80_B20_S1_M29/"
+figFolder = "fig/M29/D10/wifi/"
+logFolderName = "results/D10_B20_S1_M29/"
 senderLogFileName = "wifi_send"
+
+distance = "D10_"
 
 # Parameters
 my_fontsize = 110
@@ -135,8 +137,8 @@ def draw_avg_bar(senderLogFiles):
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "throughput_bar.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "throughput_bar.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "throughput_runs_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance +"throughput_runs_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
 
     # Latency
@@ -149,8 +151,9 @@ def draw_avg_bar(senderLogFiles):
     plt.ylabel("Latency (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "latency_bar.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "latency_bar.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder +distance + "latency_runs_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "latency_runs_wifi.eps",
+                dpi=300, bbox_inches="tight")
     plt.clf()
 
     # Packet loss rate
@@ -161,13 +164,13 @@ def draw_avg_bar(senderLogFiles):
     plot_packetloss = sns.barplot(
         data=packetLossList, palette=colors, width=width, errorbar=('ci', 95), errwidth=20)
     plt.xlabel("Run", fontsize=my_fontsize)
-    plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
+    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     # plt.ylim(0.0, 100.0)
-    plt.savefig(figFolder + "packetlossrate_bar.svg",
+    plt.savefig(figFolder + distance + "packetlossrate_runs_wifi.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "packetlossrate_bar.eps",
+    plt.savefig(figFolder + distance + "packetlossrate__runs_wifi.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
 
@@ -194,8 +197,9 @@ def draw_avg_bar(senderLogFiles):
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
     plt.ylim(min(newRssiList), 0)
-    plt.savefig(figFolder + "rssi_bar.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rssi_bar.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance +"rssi_runs_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "rssi_runs_wifi.eps",
+                dpi=300, bbox_inches="tight")
     plt.clf()
     
 

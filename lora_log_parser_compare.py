@@ -67,10 +67,10 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
         receivePacket.append(p)
 
     first_t = datetime.fromtimestamp(receivePacket[0].timeStamp)
-    last_t = datetime.fromtimestamp(receivePacket[len(receivePacket) - 1].timeStamp)
-    delta = (last_t - first_t).total_seconds() * 1000.0
-
-
+    
+        
+    
+    
     recvIndex = 0
     for i in range(len(sendPacket)):
         # print("{} : {}".format(receivePacket[recvIndex].seq, sendPacket[i].seq))
@@ -78,11 +78,11 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
             lostPacket += 1
             continue
         else:
-            # t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
-            # t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp + 2)
-            # delta = (t2 - t1).total_seconds() * 1000.0
+            t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
+            t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp)
+            delta = (t2 - t1).total_seconds() * 1000.0
             throughputList.append(
-                receivePacket[recvIndex].packetSize * 8.0 / 1000.0 / delta * 1000.0 * 100.0)  # kbps
+                receivePacket[recvIndex].packetSize * 8.0 / 1000.0 )  # kbps
             latencyList.append(delta)  # ms
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
@@ -91,7 +91,7 @@ def cal_metric(senderLogFile, receiverLogFile, doprint=True):
     senderLogFile.close()
     receiverLogFile.close()
 
-    return throughputList, latencyList, lostPacket , rssiList, snrList
+    return sum(throughputList) / 10.0, latencyList, lostPacket , rssiList, snrList
 
 
 def draw_compare_line(expNumber):
@@ -112,8 +112,6 @@ def draw_compare_line(expNumber):
         RssiList1.append(r)
         SnrList1.append(s)
         
-        
-    
     ThroughputList1 = pd.DataFrame(ThroughputList1)
     ThroughputList1 = ThroughputList1.T
     ThroughputList1['Avg'] = (ThroughputList1[0] + ThroughputList1[1] + ThroughputList1[2] + ThroughputList1[3] + ThroughputList1[4] + ThroughputList1[5] +
@@ -321,8 +319,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "throughput_distance.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "throughput_distance.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_distance_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Latency
@@ -338,8 +336,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "latency_distance.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "latency_distance.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "latency_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "latency_distance_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Packet loss rate
@@ -355,9 +353,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "packetlossrate_distance.svg",
+    plt.savefig(figFolder + "packetlossrate_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "packetlossrate_distance.eps",
+    plt.savefig(figFolder + "packetlossrate_distance_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
@@ -374,9 +372,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "rssi_distance.svg",
+    plt.savefig(figFolder + "rssi_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rssi_distance.eps",
+    plt.savefig(figFolder + "rssi_distance_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
@@ -393,9 +391,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("SNR (dB)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "snr_distance.svg",
+    plt.savefig(figFolder + "snr_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "snr_distance.eps",
+    plt.savefig(figFolder + "snr_distance_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
 

@@ -195,8 +195,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "throughput_distance.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "throughput_distance.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_distance_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_distance_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Latency
@@ -212,8 +212,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("RTT (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "rtt_distance.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rtt_distance.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rtt_distance_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rtt_distance_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Packet loss rate
@@ -226,12 +226,12 @@ def draw_compare_line(expNumber):
     sns.pointplot(data=packetLossList,  errorbar=('ci', 95),
                   errwidth=10, scale=2, dodge=1, join=True)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
-    plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
+    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "packetlossrate_distance.svg",
+    plt.savefig(figFolder + "packetlossrate_distance_wifi.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "packetlossrate_distance.eps",
+    plt.savefig(figFolder + "packetlossrate_distance_wifi.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
@@ -248,15 +248,18 @@ def draw_compare_line(expNumber):
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "rssi_distance.svg",
+    plt.savefig(figFolder + "rssi_distance_wifi.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rssi_distance.eps",
+    plt.savefig(figFolder + "rssi_distance_wifi.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
     
 
 if __name__ == "__main__":
+    
+
+    
     
     # Args parser
     parser = argparse.ArgumentParser()
