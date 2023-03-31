@@ -246,8 +246,10 @@ def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
     for i in range(len(sendPacket)):
         # print("{} : {}".format(receivePacket[recvIndex].seq, sendPacket[i].seq))
         if (receivePacket[recvIndex].seq != sendPacket[i].seq):
+            latencyList.append(0)  # ms
+            rssiList.append(0)
+            snrList.append(0)
             lostPacket += 1
-            continue
         else:
             t1 = datetime.fromtimestamp(sendPacket[i].timeStamp)
             t2 = datetime.fromtimestamp(receivePacket[recvIndex].timeStamp)
@@ -260,13 +262,14 @@ def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
             rssiList.append(receivePacket[recvIndex].rssi)
             snrList.append(receivePacket[recvIndex].snr)
             recvIndex += 1
-
         if (i % index == 9):
             loss_list.append(lostPacket)
             lostPacket = 0
+        
             
-    print("{} : {}".format(len(loss_list), len(sendPacket)))
-    print(loss_list)
+    # print("{} : {}".format(len(latencyList), len(sendPacket)))
+    # for i in range(len(latencyList)):
+    #     print(latencyList[i])
     l =len(avgThroughput)
     for i in range(l, 10):
         avgThroughput.append(t)
@@ -275,26 +278,59 @@ def cal_10s_metric(senderLogFile, receiverLogFile, doprint=True):
         # avgThroughput.append(
         #     sum(throughputList[i*10:i*10+9]) / len(throughputList[i*10:i*10+9]) * 100.0)
         # avgThroughput.append(sum(throughputList[i*10:i*10+9]) * 10)
-        if (len(latencyList[i*10:i*10+9]) > 0):
-            avgLatency.append(
-            sum(latencyList[i*10:i*10+9]) / len(latencyList[i*10:i*10+9]))
-        else:
+        sumLatency = 0
+        validLatency = 0
+        for j in range(i*10, (i+1)*10):
+            if(latencyList[j] != 0):
+                validLatency += 1
+                sumLatency += latencyList[j]
+        if(validLatency == 0):
             avgLatency.append(0)
-        if (len(rssiList[i*10:i*10+9]) > 0):
-            avgRssi.append(sum(rssiList[i*10:i*10+9]) / len(rssiList[i*10:i*10+9]))
         else:
+            avgLatency.append(sumLatency / validLatency)
+
+        sumRssi = 0
+        validRssi = 0
+        for j in range(i*10, (i+1)*10):
+            if(rssiList[j] != 0):
+                validRssi += 1
+                sumRssi += rssiList[j]
+        if(validRssi == 0):
             avgRssi.append(0)
-        if (len(snrList[i*10:i*10+9]) > 0):
-            avgSnr.append(sum(snrList[i*10:i*10+9]) / len(snrList[i*10:i*10+9]))
         else:
+            avgRssi.append(sumRssi / validRssi)
+
+        sumSnr = 0
+        validSnr = 0
+        for j in range(i*10, (i+1)*10):
+            if(snrList[j] != 0):
+                validSnr += 1
+                sumSnr += snrList[j]
+        if(validSnr == 0):
             avgSnr.append(0)
-        packetLoss.append(
-            (loss_list[i]) / len(sendPacket[i*10:i*10+9]) * 100.0)
+        else:
+            avgSnr.append(sumSnr / validSnr)
+        packetLoss.append((loss_list[i]) / len(sendPacket[i*10:(i+1)*10]) * 100.0)
+        # if (len(latencyList[i*10:(i+1)*10]) > 0):
+        #     avgLatency.append(
+        #     sum(latencyList[i*10:(i+1)*10]) / len(latencyList[i*10:(i+1)*10]))
+        # else:
+        #     avgLatency.append(0)
+        # if (len(rssiList[i*10:(i+1)*10]) > 0):
+        #     avgRssi.append(sum(rssiList[i*10:(i+1)*10]) / len(rssiList[i*10:(i+1)*10]))
+        # else:
+        #     avgRssi.append(0)
+        # if (len(snrList[i*10:(i+1)*10]) > 0):
+        #     avgSnr.append(sum(snrList[i*10:(i+1)*10]) / len(snrList[i*10:(i+1)*10]))
+        # else:
+        #     avgSnr.append(0)
+        # packetLoss.append(
+        #     (loss_list[i]) / len(sendPacket[i*10:(i+1)*10]) * 100.0)
 
     senderLogFile.close()
     receiverLogFile.close()
 
-    return avgThroughput, avgLatency, packetLoss, avgRssi, avgSnr
+    return np.array(avgThroughput), np.array(avgLatency), np.array(packetLoss), np.array(avgRssi), np.array(avgSnr)
 
 
 def draw_avg_bar(senderLogFiles, receiverLogFiles):
@@ -544,13 +580,12 @@ def draw_bar(senderLogFiles, receiverLogFiles):
 
 
 def draw_avg_line(senderLogFiles, receiverLogFiles):
-
     # Plot parameters
 
     # colors = ["blue", "red", "green", 'purple', 'brown']
     colors = ["blue", "red", "green", 'purple', 'brown', 'orange',
               'pink', 'gray', 'olive', 'cyan', 'darkblue', 'black']
-    x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
@@ -606,32 +641,38 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
         senderLogFiles[11], receiverLogFiles[11], False)
 
     # Throughput
-    plt.plot(x, t0, color=colors[0], label="1", linestyle="--",
+    mask = t0 != 0
+    plt.plot(x[mask], t0[mask], color=colors[0], label="1", linestyle="--",
              marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, t8, color=colors[8], label="9", linestyle="-.",
+    mask = t8 != 0
+    plt.plot(x[mask], t8[mask], color=colors[8], label="9", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, t1, color=colors[1], label="1", linestyle="-",
+    # plt.plot(x[mask], t1, color=colors[1], label="1", linestyle="-",
     #          marker="o", linewidth=10, markersize=80, markevery=1)
     
-    plt.plot(x, t2, color=colors[2], label="3", linestyle="-",
+    mask = t2 != 0
+    plt.plot(x[mask], t2[mask], color=colors[2], label="3", linestyle="-",
              marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, t10, color=colors[10], label="11", linestyle="-.",
+    mask = t10 != 0
+    plt.plot(x[mask], t10[mask], color=colors[10], label="11", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, t3, color=colors[3], label="3", linestyle="-.",
+    # plt.plot(x[mask], t3, color=colors[3], label="3", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, t4, color=colors[4], label="5", linestyle="-.",
+    mask = t4 != 4
+    plt.plot(x[mask], t4[mask], color=colors[4], label="5", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, t5, color=colors[5], label="5", linestyle="-.",
+    # plt.plot(x[mask], t5, color=colors[5], label="5", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, t6, color=colors[6], label="7", linestyle="-.",
+    mask = t6 != 0
+    plt.plot(x[mask], t6[mask], color=colors[6], label="7", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, t7, color=colors[7], label="7", linestyle="-.",
+    # plt.plot(x[mask], t7, color=colors[7], label="7", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, t9, color=colors[9], label="9", linestyle="-.",
+    # plt.plot(x[mask], t9, color=colors[9], label="9", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, t11, color=colors[11], label="11", linestyle="-.",
+    # plt.plot(x[mask], t11, color=colors[11], label="11", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -648,33 +689,39 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.clf()
 
     # Latency
-    plt.plot(x, l0, color=colors[0], label="1", linestyle="--",
+    mask = l0 != 0
+    plt.plot(x[mask], l0[mask], color=colors[0], label="1", linestyle="--",
              marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, l8, color=colors[8], label="9", linestyle="-.",
+    mask = l8 != 0
+    plt.plot(x[mask], l8[mask], color=colors[8], label="9", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, l2, color=colors[2], label="3", linestyle="-",
+    mask = l2 != 0
+    plt.plot(x[mask], l2[mask], color=colors[2], label="3", linestyle="-",
              marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, l10, color=colors[10], label="11", linestyle="-.",
+    mask = l10 != 0
+    plt.plot(x[mask], l10[mask], color=colors[10], label="11", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, l4, color=colors[4], label="5", linestyle="-.",
+    mask = l4 != 0
+    plt.plot(x[mask], l4[mask], color=colors[4], label="5", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, l1, color=colors[1], label="2", linestyle="-",
+    # plt.plot(x[mask], l1, color=colors[1], label="2", linestyle="-",
     #          marker="o", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, l3, color=colors[3], label="3", linestyle="-.",
+    # plt.plot(x[mask], l3, color=colors[3], label="3", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, l5, color=colors[5], label="5", linestyle="-.",
+    # plt.plot(x[mask], l5, color=colors[5], label="5", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, l6, color=colors[6], label="6", linestyle="-.",
+    mask = l6 != 0
+    plt.plot(x[mask], l6[mask], color=colors[6], label="6", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, l7, color=colors[7], label="7", linestyle="-.",
+    # plt.plot(x[mask], l7, color=colors[7], label="7", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, l9, color=colors[9], label="9", linestyle="-.",
+    # plt.plot(x[mask], l9, color=colors[9], label="9", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, l11, color=colors[11], label="11", linestyle="-.",
+    # plt.plot(x[mask], l11, color=colors[11], label="11", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -732,32 +779,37 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.clf()
 
     # SNR
-    plt.plot(x, s0, color=colors[0], label="1", linestyle="--",
+    mask = s0 != 0
+    plt.plot(x[mask], s0[mask], color=colors[0], label="1", linestyle="--",
              marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, s8, color=colors[8], label="9", linestyle="-.",
+    mask = s8 != 0
+    plt.plot(x[mask], s8[mask], color=colors[8], label="9", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, s1, color=colors[1], label="2", linestyle="-",
+    # plt.plot(x[mask], s1, color=colors[1], label="2", linestyle="-",
     #          marker="o", linewidth=10, markersize=80, markevery=1)
-    
-    plt.plot(x, s2, color=colors[2], label="3", linestyle="-",
+    mask = s2 != 0
+    plt.plot(x[mask], s2[mask], color=colors[2], label="3", linestyle="-",
              marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, s10, color=colors[10], label="11", linestyle="-.",
+    mask = s10 != 0
+    plt.plot(x[mask], s10[mask], color=colors[10], label="11", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, s3, color=colors[3], label="4", linestyle="-.",
+    # plt.plot(x[mask], s3, color=colors[3], label="4", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, s4, color=colors[4], label="5", linestyle="-.",
+    mask = s4 != 0
+    plt.plot(x[mask], s4[mask], color=colors[4], label="5", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, s5, color=colors[5], label="6", linestyle="-.",
+    # plt.plot(x[mask], s5, color=colors[5], label="6", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, s6, color=colors[6], label="7", linestyle="-.",
+    mask = s6 != 0
+    plt.plot(x[mask], s6[mask], color=colors[6], label="7", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, s7, color=colors[7], label="8", linestyle="-.",
+    # plt.plot(x[mask], s7, color=colors[7], label="8", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, s9, color=colors[9], label="10", linestyle="-.",
+    # plt.plot(x[mask], s9, color=colors[9], label="10", linestyle="-.",
             #  marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, s11, color=colors[11], label="12", linestyle="-.",
+    # plt.plot(x[mask], s11, color=colors[11], label="12", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -772,33 +824,38 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
                 dpi=300, bbox_inches="tight")
     plt.clf()
 
+    mask = r0 != 0
     # RSSI
-    plt.plot(x, r0, color=colors[0], label="1", linestyle="--",
+    plt.plot(x[mask], r0[mask], color=colors[0], label="1", linestyle="--",
              marker=">", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, r8, color=colors[8], label="9", linestyle="-.",
+    mask = r8 != 0
+    plt.plot(x[mask], r8[mask], color=colors[8], label="9", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, r1, color=colors[1], label="2", linestyle="-",
+    # plt.plot(x[mask], r1, color=colors[1], label="2", linestyle="-",
     #          marker="o", linewidth=10, markersize=80, markevery=1)
-    
-    plt.plot(x, r2, color=colors[2], label="3", linestyle="-",
+    mask = r2 != 0
+    plt.plot(x[mask], r2[mask], color=colors[2], label="3", linestyle="-",
              marker="o", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, r10, color=colors[10], label="11", linestyle="-.",
+    mask = r10 != 0
+    plt.plot(x[mask], r10[mask], color=colors[10], label="11", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, r3, color=colors[3], label="4", linestyle="-.",
+    # plt.plot(x[mask], r3, color=colors[3], label="4", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, r4, color=colors[4], label="5", linestyle="-.",
+    mask = r4 != 0
+    plt.plot(x[mask], r4[mask], color=colors[4], label="5", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, r5, color=colors[5], label="6", linestyle="-.",
+    # plt.plot(x[mask], r5, color=colors[5], label="6", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
-    plt.plot(x, r6, color=colors[6], label="7", linestyle="-.",
+    mask = r6 != 0
+    plt.plot(x[mask], r6[mask], color=colors[6], label="7", linestyle="-.",
              marker="v", linewidth=10, markersize=80, markevery=1)
-    # plt.plot(x, r7, color=colors[7], label="8", linestyle="-.",
+    # plt.plot(x[mask], r7, color=colors[7], label="8", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, r9, color=colors[9], label="10", linestyle="-.",
+    # plt.plot(x[mask], r9, color=colors[9], label="10", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     
-    # plt.plot(x, r11, color=colors[11], label="12", linestyle="-.",
+    # plt.plot(x[mask], r11, color=colors[11], label="12", linestyle="-.",
     #          marker="v", linewidth=10, markersize=80, markevery=1)
     plt.xticks(fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -838,10 +895,10 @@ if __name__ == "__main__":
             # cal_avg_metric(s_file, r_file, True)
         # Bar
         # draw_avg_bar(senderLogFiles, receiverLogFiles)
-        draw_bar(senderLogFiles, receiverLogFiles)
+        # draw_bar(senderLogFiles, receiverLogFiles)
 
         # Line
-        # draw_avg_line(senderLogFiles, receiverLogFiles)
+        draw_avg_line(senderLogFiles, receiverLogFiles)
     else:
         # Open log files
         senderLogFile = open(logFolderName + senderLogFileName +
