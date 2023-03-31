@@ -1,0 +1,26 @@
+------------------------------------------------------------
+Client connecting to 192.168.1.6, UDP port 5001
+UDP buffer size:  176 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.1.5 port 39537 connected with 192.168.1.6 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3] 0.0000-1.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 1.0000-2.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 2.0000-3.0000 sec  11.0 KBytes  90.4 Kbits/sec
+[  3] 3.0000-4.0000 sec  1.07 KBytes  8.80 Kbits/sec
+[  3] 4.0000-5.0000 sec   111 KBytes   911 Kbits/sec
+[  3] 5.0000-6.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 6.0000-7.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 7.0000-8.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 8.0000-9.0000 sec  47.7 KBytes   390 Kbits/sec
+[  3] 9.0000-10.0000 sec  68.7 KBytes   562 Kbits/sec
+[  3] 0.0000-10.0005 sec   884 KBytes   725 Kbits/sec
+[  3] Sent 0 datagrams
+[  3] Server Report:
+[ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
+[  3] 0.0000-10.1224 sec   882 KBytes   714 Kbits/sec   0.668 ms   24/ 9057 (0.26%)
+[  3] 0.0000-10.1224 sec  1 datagrams received out-of-order
+
+
+Signal strength: -35 dBm
+SNR: None dB
