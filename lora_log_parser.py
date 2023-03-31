@@ -643,7 +643,7 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'Latency (ms)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+    plt.legend(labels, loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
                title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
     plt.tight_layout()
     plt.savefig(figFolder + distance + "latency_time_lora.svg",
@@ -661,7 +661,7 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'Packet Loss Rate (%)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+    plt.legend(labels, loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
                title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
     plt.tight_layout()
     plt.savefig(figFolder + distance + "packetlossrate_time_lora.svg",
@@ -679,7 +679,7 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'SNR (dB)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+    plt.legend(labels, loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
                title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
     plt.tight_layout()
     plt.savefig(figFolder + distance +"snr_time_lora.svg", dpi=300, bbox_inches="tight")
@@ -696,7 +696,7 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.xlim(0, 11)
     plt.xlabel('Time (s)', fontsize=my_fontsize)
     plt.ylabel(f'RSSI (dBm)', fontsize=my_fontsize)
-    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+    plt.legend(labels, loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
                title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
     plt.tight_layout()
     plt.savefig(figFolder + distance +"rssi_time_lora.svg", dpi=300, bbox_inches="tight")
