@@ -8,16 +8,17 @@ import pandas as pd
 import matplotlib.ticker as ticker
 import math
 
-figFolder = "fig/fishtank_20cm_dry_sand_M31_6pm/lora/"
-logFolderName = "fishtank_20cm_dry_sand_M31_6pm/"
+figFolder = "fig/fishtank_20cm_dry_sand_M31_4pm/lora/"
+logFolderName = "fishtank_20cm_dry_sand_M31_4pm/"
 
-# figFolder = "fig/M29/D160/lora/"
-# logFolderName = "results/D160_B20_S1_M29/"
+# figFolder = "fig/M29/D80/lora/"
+# logFolderName = "results/D80_B20_S1_M29/"
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
 
 distance = ""
 distances = ["D1B125T1_", "D1B125T3_", "D1B125T15_", "D2B125T1_", "D2B125T3_", "D2B125T15_", "D4B500T1_", "D4B500T3_", "D4B500T15_"]
+
 
 # Parameters
 my_fontsize = 110
@@ -703,6 +704,200 @@ def draw_avg_line(senderLogFiles, receiverLogFiles):
     plt.savefig(figFolder + distance +"rssi_time_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
 
+
+def draw_var_line(senderLogFiles, receiverLogFiles):
+    # Plot parameters
+
+    # colors = ["blue", "red", "green", 'purple', 'brown']
+    colors = ["blue", "red", "green", 'purple', 'brown', 'orange',
+              'pink', 'gray', 'olive', 'cyan', 'darkblue', 'black']
+    markers = [">", "v", "o", "^", "8"]
+    x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
+    t = []
+    l = []
+    p = []
+    r = []
+    s = []
+    vt = []
+    vl = []
+    vp = []
+    vr = []
+    vs = []
+
+    for i in range(len(senderLogFiles)):
+        _t, _l, _p, _r, _s = cal_10s_metric(senderLogFiles[i], receiverLogFiles[i], False)
+        t.append(_t)
+        l.append(_l)
+        p.append(_p)
+        r.append(_r)
+        s.append(_s)
+        vt.append([np.var(_t), i])
+        vl.append([np.var(_l), i])
+        vp.append([np.var(_p), i])
+        vr.append([np.var(_r), i])
+        vs.append([np.var(_s), i])
+
+    # Throughput
+    vt = sorted(vt)
+    if(len(vt) % 2 == 0):
+        first_idx = vt[0][1]
+        last_idx = vt[-1][1]
+        m1_idx = vt[int(len(vt)/2-1)][1]
+        m2_idx = vt[int(len(vt)/2)][1]
+        t = [t[first_idx], (t[m1_idx] + t[m2_idx]) / 2, t[last_idx]]
+    else:
+        first_idx = vt[0][1]
+        last_idx = vt[-1][1]
+        m_idx = vt[math.floor(len(vt)/2)][1]
+        t = [t[first_idx], t[m_idx], t[last_idx]]
+    
+    for i in range(3):
+        mask = t[i] != 0
+        plt.plot(x[mask], t[i][mask], color=colors[i%len(colors)], label=str(i), linestyle="--", marker=markers[i%len(markers)], linewidth=10, markersize=80, markevery=1)
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.xlim(0, 11)
+
+    plt.xlabel('Time (s)', fontsize=my_fontsize)
+    plt.ylabel(f'Throughput (kbps)', fontsize=my_fontsize)
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+               title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
+    plt.tight_layout()
+    plt.savefig(figFolder + distance + "throughput_time_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "throughput_time_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Latency
+    vl = sorted(vl)
+    if(len(vl) % 2 == 0):
+        first_idx = vl[0][1]
+        last_idx = vl[-1][1]
+        m1_idx = vl[int(len(vl)/2-1)][1]
+        m2_idx = vl[int(len(vl)/2)][1]
+        l = [l[first_idx], (l[m1_idx] + l[m2_idx]) / 2, l[last_idx]]
+    else:
+        first_idx = vl[0][1]
+        last_idx = vl[-1][1]
+        m_idx = vl[math.floor(len(vl)/2)][1]
+        l = [l[first_idx], l[m_idx], l[last_idx]]
+    
+    for i in range(3):
+        mask = l[i] != 0
+        plt.plot(x[mask], l[i][mask], color=colors[i%len(colors)], label=str(i), linestyle="--", marker=markers[i%len(markers)], linewidth=10, markersize=80, markevery=1)
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.xlim(0, 11)
+
+    plt.xlabel('Time (s)', fontsize=my_fontsize)
+    plt.ylabel(f'Latency (ms)', fontsize=my_fontsize)
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+               title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
+    plt.tight_layout()
+    plt.savefig(figFolder + distance + "latency_time_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "latency_time_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+    
+    # Packet loss rate
+    vp = sorted(vp)
+    if(len(vp) % 2 == 0):
+        first_idx = vp[0][1]
+        last_idx = vp[-1][1]
+        m1_idx = vp[int(len(vp)/2-1)][1]
+        m2_idx = vp[int(len(vp)/2)][1]
+        p = [p[first_idx], (p[m1_idx] + p[m2_idx]) / 2, p[last_idx]]
+    else:
+        first_idx = vp[0][1]
+        last_idx = vp[-1][1]
+        m_idx = vp[math.floor(len(vp)/2)][1]
+        p = [p[first_idx], p[m_idx], p[last_idx]]
+    
+    for i in range(3):
+        plt.plot(x, p[i], color=colors[i%len(colors)], label=str(i), linestyle="--", marker=markers[i%len(markers)], linewidth=10, markersize=80, markevery=1)
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.xlim(0, 11)
+
+    plt.xlabel('Time (s)', fontsize=my_fontsize)
+    plt.ylabel(f'Packet Loss Rate (%)', fontsize=my_fontsize)
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+               title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
+    plt.tight_layout()
+    plt.savefig(figFolder + distance + "packetlossrate_time_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "packetlossrate_time_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # SNR
+    vs = sorted(vs)
+    if(len(vs) % 2 == 0):
+        first_idx = vs[0][1]
+        last_idx = vs[-1][1]
+        m1_idx = vs[int(len(vs)/2-1)][1]
+        m2_idx = vs[int(len(vs)/2)][1]
+        s = [s[first_idx], (s[m1_idx] + s[m2_idx]) / 2, s[last_idx]]
+    else:
+        first_idx = vs[0][1]
+        last_idx = vs[-1][1]
+        m_idx = vs[math.floor(len(vs)/2)][1]
+        s = [s[first_idx], s[m_idx], s[last_idx]]
+    
+    for i in range(3):
+        mask = s[i] != 0
+        plt.plot(x[mask], s[i][mask], color=colors[i%len(colors)], label=str(i), linestyle="--", marker=markers[i%len(markers)], linewidth=10, markersize=80, markevery=1)
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.xlim(0, 11)
+
+    plt.xlabel('Time (s)', fontsize=my_fontsize)
+    plt.ylabel(f'SNR (dB)', fontsize=my_fontsize)
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+               title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
+    plt.tight_layout()
+    plt.savefig(figFolder + distance +"snr_time_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance + "snr_time_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # RSSI
+    vr = sorted(vr)
+    if(len(vr) % 2 == 0):
+        first_idx = vr[0][1]
+        last_idx = vr[-1][1]
+        m1_idx = vr[int(len(vr)/2-1)][1]
+        m2_idx = vr[int(len(vr)/2)][1]
+        r = [r[first_idx], (r[m1_idx] + r[m2_idx]) / 2, r[last_idx]]
+    else:
+        first_idx = vr[0][1]
+        last_idx = vr[-1][1]
+        m_idx = vr[math.floor(len(vr)/2)][1]
+        r = [r[first_idx], r[m_idx], r[last_idx]]
+    
+    for i in range(3):
+        mask = r[i] != 0
+        plt.plot(x[mask], r[i][mask], color=colors[i%len(colors)], label=str(i), linestyle="--", marker=markers[i%len(markers)], linewidth=10, markersize=80, markevery=1)
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    plt.xlim(0, 11)
+    plt.xlabel('Time (s)', fontsize=my_fontsize)
+    plt.ylabel(f'RSSI (dBm)', fontsize=my_fontsize)
+    plt.legend(loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+               title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.35))
+    plt.tight_layout()
+    plt.savefig(figFolder + distance +"rssi_time_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + distance +"rssi_time_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
 if __name__ == "__main__":
 
     read_all_file = True
@@ -721,32 +916,32 @@ if __name__ == "__main__":
             senderLogFiles = []
             receiverLogFiles = []
             distance = distances[i]
+            print("Dealing with file {}".format(distances[i]))
             for j in range(args.expNumber+1):
                 s_file = open(logFolderName + distance + senderLogFileName + "_" + str(j) + ".log", "r")
                 r_file = open(logFolderName + distance + receiverLogFileName + "_" + str(j) + ".log", "r") 
                 senderLogFiles.append(s_file)
                 receiverLogFiles.append(r_file)
-            draw_avg_line(senderLogFiles, receiverLogFiles)
+            draw_var_line(senderLogFiles, receiverLogFiles)
             # draw_avg_bar(senderLogFiles, receiverLogFiles)
             # draw_bar(senderLogFiles, receiverLogFiles)
         
         # for i in range(args.expNumber + 1):
-        #     # s_file = open(logFolderName + distance + senderLogFileName +
-        #     #               "_" + str(i) + ".log", "r")
-        #     # r_file = open(logFolderName + distance + receiverLogFileName +
-        #     #               "_" + str(i) + ".log", "r")
-        #     s_file = open(logFolderName + distances[j] + senderLogFileName + "_" + str(i) + ".log", "r")
-        #     r_file = open(logFolderName + distances[j] + receiverLogFileName + "_" + str(i) + ".log", "r") 
+        #     s_file = open(logFolderName + senderLogFileName +
+        #                   "_" + str(i) + ".log", "r")
+        #     r_file = open(logFolderName + receiverLogFileName +
+        #                   "_" + str(i) + ".log", "r")
         #     senderLogFiles.append(s_file)
         #     receiverLogFiles.append(r_file)
 
-        #     # cal_avg_metric(s_file, r_file, True)
-        # # Bar
-        # # draw_avg_bar(senderLogFiles, receiverLogFiles)
-        # # draw_bar(senderLogFiles, receiverLogFiles)
+            # cal_avg_metric(s_file, r_file, True)
+        # Bar
+        # draw_avg_bar(senderLogFiles, receiverLogFiles)
+        # draw_bar(senderLogFiles, receiverLogFiles)
 
-        # # Line
+        # Line
         # draw_avg_line(senderLogFiles, receiverLogFiles)
+        # draw_var_line(senderLogFiles, receiverLogFiles)
     else:
         # Open log files
         senderLogFile = open(logFolderName + senderLogFileName +
