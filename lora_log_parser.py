@@ -8,8 +8,8 @@ import pandas as pd
 import matplotlib.ticker as ticker
 import math
 
-figFolder = "fig/fishtank_20cm_dry_sand_M31_4pm/lora/"
-logFolderName = "fishtank_20cm_dry_sand_M31_4pm/"
+figFolder = "fig/rock/lora/"
+logFolderName = "rock/"
 
 # figFolder = "fig/M29/D80/lora/"
 # logFolderName = "results/D80_B20_S1_M29/"
@@ -17,6 +17,8 @@ senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
 
 distance = ""
+depth = ""
+depths = ["rock_20/", "rock_30/", "rock_40/"]
 distances = ["D1B125T1_", "D1B125T3_", "D1B125T15_", "D2B125T1_", "D2B125T3_", "D2B125T15_", "D4B500T1_", "D4B500T3_", "D4B500T15_"]
 
 
@@ -916,13 +918,21 @@ if __name__ == "__main__":
             senderLogFiles = []
             receiverLogFiles = []
             distance = distances[i]
-            print("Dealing with file {}".format(distances[i]))
-            for j in range(args.expNumber+1):
-                s_file = open(logFolderName + distance + senderLogFileName + "_" + str(j) + ".log", "r")
-                r_file = open(logFolderName + distance + receiverLogFileName + "_" + str(j) + ".log", "r") 
+            # print("Dealing with file {}".format(distances[i]))
+            # for j in range(args.expNumber+1):
+            #     s_file = open(logFolderName + depth + distance + senderLogFileName + "_" + str(j) + ".log", "r")
+            #     r_file = open(logFolderName + depth + distance + receiverLogFileName + "_" + str(j) + ".log", "r") 
+            #     senderLogFiles.append(s_file)
+            #     receiverLogFiles.append(r_file)
+            # draw_avg_line(senderLogFiles, receiverLogFiles)
+
+            for j in range(len(depths)):
+                depth = depths[j]
+                s_file = open(logFolderName + depth + distance + senderLogFileName + "_0" + ".log", "r")
+                r_file = open(logFolderName + depth + distance + receiverLogFileName + "_0" + ".log", "r") 
                 senderLogFiles.append(s_file)
                 receiverLogFiles.append(r_file)
-            draw_var_line(senderLogFiles, receiverLogFiles)
+            draw_avg_line(senderLogFiles, receiverLogFiles)
             # draw_avg_bar(senderLogFiles, receiverLogFiles)
             # draw_bar(senderLogFiles, receiverLogFiles)
         
