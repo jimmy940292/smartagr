@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import partial
 import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -176,7 +177,7 @@ def draw_compare_line(expNumber):
     # Draw Fig
     colors = ["blue", "red", "green", 'purple', 'brown']
     labels = ["10", "20", "40", "80", "160"]
-    x = [0,1,2,3,4]
+    x = [0, 1, 2, 3, 4]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
@@ -190,10 +191,14 @@ def draw_compare_line(expNumber):
     ThroughputList["80cm"] = ThroughputList4
     ThroughputList["160cm"] = ThroughputList5
         
-    sns.pointplot(data=ThroughputList,  errorbar=('ci', 95), errwidth=10, scale=2, dodge=1, join=True)
+    ax = sns.barplot(data=ThroughputList,  errorbar=(
+        'ci', 95), errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
+    plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    
     plt.xticks(x, labels, fontsize=my_fontsize)
+    # plt.xlim(0, 4)
     plt.yticks(fontsize=my_fontsize)
     plt.savefig(figFolder + "throughput_distance_wifi.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "throughput_distance_wifi.eps", dpi=300, bbox_inches="tight")
@@ -206,8 +211,8 @@ def draw_compare_line(expNumber):
     LatencyList["80cm"] = LatencyList4
     LatencyList["160cm"] = LatencyList5
 
-    sns.pointplot(data=LatencyList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=LatencyList,  errorbar=('ci', 95),
+                errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("RTT (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
@@ -223,8 +228,8 @@ def draw_compare_line(expNumber):
     packetLossList["80cm"] = packetLossList4
     packetLossList["160cm"] = packetLossList5
 
-    sns.pointplot(data=packetLossList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=packetLossList,  errorbar=('ci', 95),
+                errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
@@ -242,8 +247,8 @@ def draw_compare_line(expNumber):
     RssiList["80cm"] = RssiList4
     RssiList["160cm"] = RssiList5
 
-    sns.pointplot(data=RssiList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=RssiList,  errorbar=('ci', 95),
+                errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)

@@ -314,14 +314,22 @@ def draw_compare_line(expNumber):
     ThroughputList["80cm"] = ThroughputList4["Avg"]
     ThroughputList["160cm"] = ThroughputList5["Avg"]
         
-    sns.pointplot(data=ThroughputList,  errorbar=('ci', 95), errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=ThroughputList,  errorbar=(
+        'ci', 95), errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "throughput_distance_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "throughput_distance_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
+    
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
     
     # Latency
     LatencyList = pd.DataFrame({"10cm": LatencyList1["Avg"]})
@@ -330,15 +338,22 @@ def draw_compare_line(expNumber):
     LatencyList["80cm"] = LatencyList4["Avg"]
     LatencyList["160cm"] = LatencyList5["Avg"]
 
-    sns.pointplot(data=LatencyList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=LatencyList,  errorbar=('ci', 95),
+                errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "latency_distance_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "latency_distance_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
+    
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
     
     # Packet loss rate
     packetLossList = pd.DataFrame({"10cm": packetLossList1["Avg"]})
@@ -347,17 +362,24 @@ def draw_compare_line(expNumber):
     packetLossList["80cm"] = packetLossList4["Avg"]
     packetLossList["160cm"] = packetLossList5["Avg"]
 
-    sns.pointplot(data=packetLossList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=packetLossList,  errorbar=('ci', 95),
+             errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "packetlossrate_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "packetlossrate_distance_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
+    
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
     
     # RSSI
     RssiList = pd.DataFrame({"10cm": RssiList1["Avg"]})
@@ -366,17 +388,24 @@ def draw_compare_line(expNumber):
     RssiList["80cm"] = RssiList4["Avg"]
     RssiList["160cm"] = RssiList5["Avg"]
 
-    sns.pointplot(data=RssiList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=RssiList,  errorbar=('ci', 95),
+                errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "rssi_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "rssi_distance_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
+    
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
     
     # SNR
     SnrList = pd.DataFrame({"10cm": SnrList1["Avg"]})
@@ -385,12 +414,13 @@ def draw_compare_line(expNumber):
     SnrList["80cm"] = SnrList4["Avg"]
     SnrList["160cm"] = SnrList5["Avg"]
 
-    sns.pointplot(data=SnrList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=SnrList,  errorbar=('ci', 95),
+                  errwidth=10, width=width)
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("SNR (dB)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "snr_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "snr_distance_lora.eps",

@@ -1,0 +1,74 @@
+------------------------------------------------------------
+Client connecting to 192.168.1.6, UDP port 5001
+UDP buffer size:  176 KByte (default)
+------------------------------------------------------------
+[  3] local 192.168.1.5 port 41545 connected with 192.168.1.6 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3] 0.0000-1.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 1.0000-2.0000 sec  52.2 KBytes   428 Kbits/sec
+[  3] 2.0000-3.0000 sec  73.2 KBytes   600 Kbits/sec
+[  3] 3.0000-4.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 4.0000-5.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 5.0000-6.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 6.0000-7.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 7.0000-8.0000 sec  89.6 KBytes   734 Kbits/sec
+[  3] 8.0000-9.0000 sec  36.1 KBytes   296 Kbits/sec
+[  3] 9.0000-10.0000 sec   128 KBytes  1.05 Mbits/sec
+[  3] 0.0000-10.0014 sec  1020 KBytes   835 Kbits/sec
+[  3] Sent 0 datagrams
+[  3] Server Report:
+[ ID] Interval       Transfer     Bandwidth        Jitter   Lost/Total Datagrams
+[  3] 0.0000-10.0007 sec  1020 KBytes   835 Kbits/sec   0.074 ms    0/10440 (0%)
+
+PING 192.168.1.6 (192.168.1.6) 56(84) bytes of data.
+64 bytes from 192.168.1.6: icmp_seq=1 ttl=64 time=0.757 ms
+64 bytes from 192.168.1.6: icmp_seq=2 ttl=64 time=0.775 ms
+64 bytes from 192.168.1.6: icmp_seq=3 ttl=64 time=0.566 ms
+64 bytes from 192.168.1.6: icmp_seq=4 ttl=64 time=1.70 ms
+64 bytes from 192.168.1.6: icmp_seq=5 ttl=64 time=1.18 ms
+64 bytes from 192.168.1.6: icmp_seq=6 ttl=64 time=0.764 ms
+64 bytes from 192.168.1.6: icmp_seq=7 ttl=64 time=0.574 ms
+64 bytes from 192.168.1.6: icmp_seq=8 ttl=64 time=1.07 ms
+64 bytes from 192.168.1.6: icmp_seq=9 ttl=64 time=1.15 ms
+64 bytes from 192.168.1.6: icmp_seq=10 ttl=64 time=0.514 ms
+64 bytes from 192.168.1.6: icmp_seq=11 ttl=64 time=0.732 ms
+64 bytes from 192.168.1.6: icmp_seq=12 ttl=64 time=0.581 ms
+64 bytes from 192.168.1.6: icmp_seq=13 ttl=64 time=0.686 ms
+64 bytes from 192.168.1.6: icmp_seq=14 ttl=64 time=0.760 ms
+64 bytes from 192.168.1.6: icmp_seq=15 ttl=64 time=1107 ms
+64 bytes from 192.168.1.6: icmp_seq=16 ttl=64 time=897 ms
+64 bytes from 192.168.1.6: icmp_seq=17 ttl=64 time=688 ms
+64 bytes from 192.168.1.6: icmp_seq=18 ttl=64 time=478 ms
+64 bytes from 192.168.1.6: icmp_seq=19 ttl=64 time=269 ms
+64 bytes from 192.168.1.6: icmp_seq=20 ttl=64 time=59.3 ms
+64 bytes from 192.168.1.6: icmp_seq=21 ttl=64 time=0.648 ms
+64 bytes from 192.168.1.6: icmp_seq=22 ttl=64 time=0.632 ms
+64 bytes from 192.168.1.6: icmp_seq=23 ttl=64 time=2.73 ms
+64 bytes from 192.168.1.6: icmp_seq=24 ttl=64 time=0.480 ms
+64 bytes from 192.168.1.6: icmp_seq=25 ttl=64 time=0.828 ms
+64 bytes from 192.168.1.6: icmp_seq=26 ttl=64 time=0.648 ms
+64 bytes from 192.168.1.6: icmp_seq=27 ttl=64 time=0.645 ms
+64 bytes from 192.168.1.6: icmp_seq=28 ttl=64 time=0.502 ms
+64 bytes from 192.168.1.6: icmp_seq=29 ttl=64 time=0.489 ms
+64 bytes from 192.168.1.6: icmp_seq=30 ttl=64 time=0.710 ms
+64 bytes from 192.168.1.6: icmp_seq=31 ttl=64 time=0.525 ms
+64 bytes from 192.168.1.6: icmp_seq=32 ttl=64 time=0.533 ms
+64 bytes from 192.168.1.6: icmp_seq=33 ttl=64 time=0.608 ms
+64 bytes from 192.168.1.6: icmp_seq=34 ttl=64 time=0.792 ms
+64 bytes from 192.168.1.6: icmp_seq=35 ttl=64 time=0.516 ms
+64 bytes from 192.168.1.6: icmp_seq=36 ttl=64 time=0.494 ms
+64 bytes from 192.168.1.6: icmp_seq=37 ttl=64 time=0.528 ms
+64 bytes from 192.168.1.6: icmp_seq=38 ttl=64 time=0.499 ms
+64 bytes from 192.168.1.6: icmp_seq=39 ttl=64 time=0.867 ms
+64 bytes from 192.168.1.6: icmp_seq=40 ttl=64 time=0.772 ms
+64 bytes from 192.168.1.6: icmp_seq=41 ttl=64 time=0.718 ms
+64 bytes from 192.168.1.6: icmp_seq=42 ttl=64 time=0.524 ms
+64 bytes from 192.168.1.6: icmp_seq=43 ttl=64 time=0.659 ms
+64 bytes from 192.168.1.6: icmp_seq=44 ttl=64 time=0.610 ms
+
+--- 192.168.1.6 ping statistics ---
+48 packets transmitted, 44 received, 8.33333% packet loss, time 9797ms
+rtt min/avg/max/mdev = 0.480/80.143/1106.776/239.507 ms, pipe 6
+
+Signal strength: -29 dBm
+SNR: None dB

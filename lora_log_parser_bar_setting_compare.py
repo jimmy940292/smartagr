@@ -13,6 +13,7 @@ logFolderName3 = "fishtank_20cm_dry_sand_M31_6pm/D4B500T15_"
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
 figFolder = "fig/fishtank_20cm_dry_sand_M31_6pm/lora/"
+compare = "dry_sand_"
 
 # Parameters
 my_fontsize = 110
@@ -227,8 +228,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "throughput_datarate_lora.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "throughput_datarate_lora.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + compare +  "throughput_datarate_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + compare + "throughput_datarate_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Latency
@@ -243,8 +244,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "latency_datarate_lora.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "latency_datarate_lora.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + compare + "latency_datarate_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + compare + "latency_datarate_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Packet loss rate
@@ -256,12 +257,12 @@ def draw_compare_line(expNumber):
     sns.barplot(data=packetLossList,  errorbar=('ci', 95),
                 errwidth=10, width=width)
     plt.xlabel("Data Rate", fontsize=my_fontsize)
-    plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
+    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "packetlossrate_datarate_lora.svg",
+    plt.savefig(figFolder + compare + "packetlossrate_datarate_lora.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "packetlossrate_datarate_lora.eps",
+    plt.savefig(figFolder + compare +  "packetlossrate_datarate_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
@@ -277,9 +278,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "rssi_datarate_lora.svg",
+    plt.savefig(figFolder + compare +  "rssi_datarate_lora.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rssi_datarate_lora.eps",
+    plt.savefig(figFolder + compare + "rssi_datarate_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
@@ -295,9 +296,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("SNR (dB)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "snr_datarate_lora.svg",
+    plt.savefig(figFolder + compare + "snr_datarate_lora.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "snr_datarate_lora.eps",
+    plt.savefig(figFolder + compare + "snr_datarate_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
 

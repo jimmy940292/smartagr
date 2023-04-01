@@ -203,7 +203,7 @@ def draw_compare_line(expNumber):
     
         
     sns.pointplot(data=ThroughputList,errorbar=('ci', 95), errwidth=10, scale=2, dodge=1, join=True)
-    plt.xlabel("Tx power (dBm)", fontsize=my_fontsize)
+    plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -221,7 +221,7 @@ def draw_compare_line(expNumber):
 
     sns.pointplot(data=LatencyList,  errorbar=('ci', 95),
                   errwidth=10, scale=2, dodge=1, join=True)
-    plt.xlabel("Tx power (dBm)", fontsize=my_fontsize)
+    plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("RTT (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -238,7 +238,7 @@ def draw_compare_line(expNumber):
 
     sns.pointplot(data=packetLossList,  errorbar=('ci', 95),
                   errwidth=10, scale=2, dodge=1, join=True)
-    plt.xlabel("Tx power (dBm)", fontsize=my_fontsize)
+    plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
@@ -257,7 +257,7 @@ def draw_compare_line(expNumber):
 
     sns.pointplot(data=RssiList,  errorbar=('ci', 95),
                   errwidth=10, scale=2, dodge=1, join=True)
-    plt.xlabel("Tx power (dBm)", fontsize=my_fontsize)
+    plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
