@@ -123,7 +123,7 @@ if __name__ == '__main__':
         output_file.write("\n")
         
         # Latency, Packet loss rate
-        result = subprocess.run(["ping", "-w", str(ping_time), "-i", "0.2", "-s", "packet_size",server_ip],  stdout=subprocess.PIPE)
+        result = subprocess.run(["ping", "-w", str(ping_time), "-i", "0.2",server_ip],  stdout=subprocess.PIPE)
         print("Round {}\n".format(str(i)))
         s = result.stdout.decode("utf-8")
         print(s)

@@ -187,7 +187,7 @@ def draw_compare_line(expNumber):
     # Draw Fig
     colors = ["blue", "red", "green", 'purple', 'brown']
     labels = ["1", "3", "5", "10", "20"]
-    x = [0,1,2,3,4]
+    x = [1, 3, 5, 10 ,20]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
@@ -202,13 +202,14 @@ def draw_compare_line(expNumber):
     ThroughputList["20"] = ThroughputList5
     
         
-    sns.pointplot(data=ThroughputList,  errorbar=('ci', 95), errwidth=10, scale=2, dodge=1, join=True)
+    sns.pointplot(data=ThroughputList,errorbar=('ci', 95), errwidth=10, scale=2, dodge=1, join=True)
     plt.xlabel("Tx power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "throughput_distance_wifi.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "throughput_distance_wifi.eps", dpi=300, bbox_inches="tight")
+    
+    plt.savefig(figFolder + "throughput_txpower_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_txpower_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Latency
@@ -224,8 +225,8 @@ def draw_compare_line(expNumber):
     plt.ylabel("RTT (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "rtt_distance_wifi.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rtt_distance_wifi.eps", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rtt_txpower_wifi.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rtt_txpower_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
     # Packet loss rate
@@ -241,9 +242,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "packetlossrate_distance_wifi.svg",
+    plt.savefig(figFolder + "packetlossrate_txpower_wifi.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "packetlossrate_distance_wifi.eps",
+    plt.savefig(figFolder + "packetlossrate_txpower_wifi.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
@@ -260,9 +261,9 @@ def draw_compare_line(expNumber):
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + "rssi_distance_wifi.svg",
+    plt.savefig(figFolder + "rssi_txpower_wifi.svg",
                 dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + "rssi_distance_wifi.eps",
+    plt.savefig(figFolder + "rssi_txpower_wifi.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
     
