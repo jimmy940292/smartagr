@@ -8,8 +8,8 @@ import pandas as pd
 import matplotlib.ticker as ticker
 import math
 
-figFolder = "fig/rock/lora/"
-logFolderName = "rock/"
+figFolder = "fig/fishtank_20cm_300cc_sand_M31_7pm/lora/"
+logFolderName = "fishtank_20cm_300cc_sand_M31_7pm/"
 
 # figFolder = "fig/M29/D80/lora/"
 # logFolderName = "results/D80_B20_S1_M29/"
@@ -744,7 +744,6 @@ def draw_var_line(senderLogFiles, receiverLogFiles):
         vp.append([np.var(_p), i])
         vr.append([np.var(_r), i])
         vs.append([np.var(_s), i])
-
     # Throughput
     vt = sorted(vt)
     if(len(vt) % 2 == 0):
@@ -918,21 +917,21 @@ if __name__ == "__main__":
             senderLogFiles = []
             receiverLogFiles = []
             distance = distances[i]
-            # print("Dealing with file {}".format(distances[i]))
-            # for j in range(args.expNumber+1):
-            #     s_file = open(logFolderName + depth + distance + senderLogFileName + "_" + str(j) + ".log", "r")
-            #     r_file = open(logFolderName + depth + distance + receiverLogFileName + "_" + str(j) + ".log", "r") 
+            print("Dealing with file {}".format(distances[i]))
+            for j in range(args.expNumber+1):
+                s_file = open(logFolderName + depth + distance + senderLogFileName + "_" + str(j) + ".log", "r")
+                r_file = open(logFolderName + depth + distance + receiverLogFileName + "_" + str(j) + ".log", "r") 
+                senderLogFiles.append(s_file)
+                receiverLogFiles.append(r_file)
+            draw_var_line(senderLogFiles, receiverLogFiles)
+
+            # for j in range(len(depths)):
+            #     depth = depths[j]
+            #     s_file = open(logFolderName + depth + distance + senderLogFileName + "_0" + ".log", "r")
+            #     r_file = open(logFolderName + depth + distance + receiverLogFileName + "_0" + ".log", "r") 
             #     senderLogFiles.append(s_file)
             #     receiverLogFiles.append(r_file)
             # draw_avg_line(senderLogFiles, receiverLogFiles)
-
-            for j in range(len(depths)):
-                depth = depths[j]
-                s_file = open(logFolderName + depth + distance + senderLogFileName + "_0" + ".log", "r")
-                r_file = open(logFolderName + depth + distance + receiverLogFileName + "_0" + ".log", "r") 
-                senderLogFiles.append(s_file)
-                receiverLogFiles.append(r_file)
-            draw_avg_line(senderLogFiles, receiverLogFiles)
             # draw_avg_bar(senderLogFiles, receiverLogFiles)
             # draw_bar(senderLogFiles, receiverLogFiles)
         
