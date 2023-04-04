@@ -7,14 +7,31 @@ import os
 import pandas as pd
 import matplotlib.ticker as ticker
 
-logFolderName1 = "results/D10_B20_S1_M29/"
-logFolderName2 = "results/D20_B20_S1_M29/"
-logFolderName3 = "results/D40_B20_S1_M29/"
-logFolderName4 = "results/D80_B20_S1_M29/"
-logFolderName5 = "results/D160_B20_S1_M29/"
+# logFolderName1 = "results/D10_B20_S1_M29/"
+# logFolderName2 = "results/D20_B20_S1_M29/"
+# logFolderName3 = "results/D40_B20_S1_M29/"
+# logFolderName4 = "results/D80_B20_S1_M29/"
+# logFolderName5 = "results/D160_B20_S1_M29/"
+
+# logFolderNames = ["fishtank_20cm_dry_sand_M31_6pm/D4B500T15_", "fishtank_20cm_300cc_sand_M31_7pm/D4B500T15_", 
+    # "fishtank_20cm_600cc_sand_M31_7pm/D4B500T15_", "fishtank_20cm_1200cc_sand_M31_7pm/D4B500T15_", 
+    # "fishtank_20cm_2400cc_sand_M31_7pm/D4B500T15_"]
+
+# logFolderNames = ["results/D10_B20_S1_M29/", "results/D20_B20_S1_M29/", 
+#     "results/D40_B20_S1_M29/", "results/D80_B20_S1_M29/", 
+#     "results/D160_B20_S1_M29/"]
+
+logFolderNames = ["rock/rock_20/D4B500T15_", "rock/rock_30/D4B500T15_", 
+    "rock/rock_40/D4B500T15_"]
+
 senderLogFileName = "lora_send"
 receiverLogFileName = "lora_recv"
-figFolder = "fig/M29/compare/lora/"
+
+distances = ["10/", "20/", "30/"]
+
+# figFolder = "fig/moisture_compare/lora/"
+# figFolder = "fig/distance_compare/lora/"
+figFolder = "fig/depth_compare/lora/"
 
 # Parameters
 my_fontsize = 110
@@ -319,7 +336,7 @@ def draw_compare_line(expNumber):
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
     plt.tight_layout()
     plt.savefig(figFolder + "throughput_distance_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "throughput_distance_lora.eps", dpi=300, bbox_inches="tight")
@@ -343,7 +360,7 @@ def draw_compare_line(expNumber):
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
     plt.tight_layout()
     plt.savefig(figFolder + "latency_distance_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "latency_distance_lora.eps", dpi=300, bbox_inches="tight")
@@ -367,7 +384,7 @@ def draw_compare_line(expNumber):
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("Packet loss rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
     plt.tight_layout()
     plt.savefig(figFolder + "packetlossrate_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
@@ -393,7 +410,7 @@ def draw_compare_line(expNumber):
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
     plt.tight_layout()
     plt.savefig(figFolder + "rssi_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
@@ -419,11 +436,619 @@ def draw_compare_line(expNumber):
     plt.xlabel("Distance (cm)", fontsize=my_fontsize)
     plt.ylabel("SNR (dB)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
     plt.tight_layout()
     plt.savefig(figFolder + "snr_distance_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "snr_distance_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+
+def draw_distance_line(expNumber):
+    ThroughputList = []
+    LatencyList = []
+    PacketLossList = []
+    RssiList = []
+    SnrList = []
+    avgThroughputList = []
+    avgLatencyList = []
+    avgPacketLossList = []
+    avgRssiList = []
+    avgSnrList = []
+    for i in range(len(logFolderNames)):
+        folderName = logFolderNames[i]
+        avgt = 0
+        avgl = 0
+        avgp = 0
+        avgr = 0
+        avgs = 0
+        t = []
+        l = []
+        p = []
+        r = []
+        s = []
+        for j in range(expNumber+1) :
+            _t, _l, _p, _r, _s = cal_metric(open(folderName + senderLogFileName + "_" + str(
+            j) + ".log", "r"), open(folderName + receiverLogFileName + "_" + str(j) + ".log", "r"))
+            avgt += _t
+            avgl += sum(_l) / len(_l)
+            avgp += _p
+            avgr += sum(_r) / len(_r)
+            avgs += sum(_s) / len(_s)
+            t.append(_t)
+            l.append(sum(_l) / len(_l))
+            p.append(_p)
+            r.append(sum(_r) / len(_r))
+            s.append(sum(_s) / len(_s))
+        avgt /= (expNumber+1)
+        avgl /= (expNumber+1)
+        avgp /= (expNumber+1)
+        avgr /= (expNumber+1)
+        avgs /= (expNumber+1)
+        avgThroughputList.append(avgt)
+        avgLatencyList.append(avgl)
+        avgPacketLossList.append(avgp)
+        avgRssiList.append(avgr)
+        avgSnrList.append(avgs)
+        ThroughputList.append(t)
+        LatencyList.append(l)
+        PacketLossList.append(p)
+        RssiList.append(r)
+        SnrList.append(s)
+
+    colors = ["blue", "red", "green", 'purple', 'brown']
+    labels = ["10", "20", "40", "80", "160"]
+    x = [10, 20, 40, 80, 160]
+    z=[4000]*len(avgThroughputList)
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
+    # Throughput
+    ThroughputList_err = []
+    for i in range(len(ThroughputList)):
+        ThroughputList_err.append(
+            1.96*np.std(ThroughputList[i]) / np.sqrt(len(ThroughputList[i])))
+    # sem = np.std(ThroughputList) / np.sqrt(len(ThroughputList))
+    # z_score = 1.96
+    # ThroughputList_err = z_score * sem
+    plt.errorbar(x, avgThroughputList, yerr=ThroughputList_err, linewidth=20)
+    plt.scatter(x, avgThroughputList, s=z, marker="o")
+
+    x_major_locator = ticker.MultipleLocator(40)
+    y_major_locator = ticker.MultipleLocator(0.1)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(0.1)
+    axes.yaxis.set_major_locator(y_major_locator)
+    # sns.pointplot(x = np.arange(0, 5), y = ThroughputList, errorbar=('ci', 95), scale=2, dodge=1, join=True)
+    plt.xlabel("Distance (cm)", fontsize=my_fontsize)
+    plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(0, 200)
+    plt.tight_layout()
+    plt.savefig(figFolder + "throughput_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_distance_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Latency
+    LatencyList_err = []
+    for i in range(len(LatencyList)):
+        LatencyList_err.append(
+            1.96*np.std(LatencyList[i]) / np.sqrt(len(LatencyList[i])))
+    # sem = np.std(LatencyList) / np.sqrt(len(LatencyList))
+    # z_score = 1.96
+    # LatencyList_err = z_score * sem
+    # print(LatencyList)
+    # print(LatencyList_err)
+    # print(avgLatencyList)
+    plt.errorbar(x, avgLatencyList, yerr=LatencyList_err,linewidth=20)
+    plt.scatter(x, avgLatencyList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(40)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Distance (cm)", fontsize=my_fontsize)
+    plt.ylabel("Latency (ms)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(0, 200)
+    plt.tight_layout()
+    plt.savefig(figFolder + "latency_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "latency_distance_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # PacketLoss
+    PacketLossList_err = []
+    for i in range(len(PacketLossList)):
+        PacketLossList_err.append(
+            1.96*np.std(PacketLossList[i]) / np.sqrt(len(PacketLossList[i])))
+    # sem = np.std(PacketLossList) / np.sqrt(len(PacketLossList))
+    # z_score = 1.96
+    # PacketLossList_err = z_score * sem
+    plt.errorbar(x, avgPacketLossList, yerr=PacketLossList_err,linewidth=20)
+    plt.scatter(x, avgPacketLossList, s=z, marker="o")
+    plt.ylim(bottom=0)
+    x_major_locator = ticker.MultipleLocator(40)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(0.5)
+    axes.yaxis.set_major_locator(y_major_locator)
+    plt.xlabel("Distance (cm)", fontsize=my_fontsize)
+    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(0, 200)
+    plt.ylim(0)
+    plt.tight_layout()
+    plt.savefig(figFolder + "packetLoss_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "packetLoss_distance_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Rssi
+    RssiList_err = []
+    for i in range(len(RssiList)):
+        RssiList_err.append(
+            1.96*np.std(RssiList[i]) / np.sqrt(len(RssiList[i])))
+    # sem = np.std(RssiList) / np.sqrt(len(RssiList))
+    # z_score = 1.96
+    # RssiList_err = z_score * sem
+    plt.errorbar(x, avgRssiList,yerr=RssiList_err, linewidth=20)
+    plt.scatter(x, avgRssiList,s = z, marker="o")
+    x_major_locator = ticker.MultipleLocator(40)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Distance (cm)", fontsize=my_fontsize)
+    plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(0, 200)
+    plt.ylim(-105, -80)
+    plt.tight_layout()
+    plt.savefig(figFolder + "rssi_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rssi_distance_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    SnrList_err = []
+    for i in range(len(SnrList)):
+        SnrList_err.append(
+            1.96*np.std(SnrList[i]) / np.sqrt(len(SnrList[i])))
+    # sem = np.std(SnrList) / np.sqrt(len(SnrList))
+    # z_score = 1.96
+    # SnrList_err = z_score * sem
+    plt.errorbar(x, avgSnrList, yerr=SnrList_err, linewidth=20)
+    plt.scatter(x, avgSnrList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(40)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Distance (cm)", fontsize=my_fontsize)
+    plt.ylabel("SNR (dB)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(0, 200)
+    plt.ylim(50, 60)
+    plt.tight_layout()
+    plt.savefig(figFolder + "snr_distance_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "snr_distance_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+
+def draw_moisture_line(expNumber):
+    ThroughputList = []
+    LatencyList = []
+    PacketLossList = []
+    RssiList = []
+    SnrList = []
+    avgThroughputList = []
+    avgLatencyList = []
+    avgPacketLossList = []
+    avgRssiList = []
+    avgSnrList = []
+    for i in range(len(logFolderNames)):
+        folderName = logFolderNames[i]
+        avgt = 0
+        avgl = 0
+        avgp = 0
+        avgr = 0
+        avgs = 0
+        t = []
+        l = []
+        p = []
+        r = []
+        s = []
+        for j in range(expNumber+1):
+            _t, _l, _p, _r, _s = cal_metric(open(folderName + senderLogFileName + "_" + str(
+                j) + ".log", "r"), open(folderName + receiverLogFileName + "_" + str(j) + ".log", "r"))
+            avgt += _t
+            avgl += sum(_l) / len(_l)
+            avgp += _p
+            avgr += sum(_r) / len(_r)
+            avgs += sum(_s) / len(_s)
+            t.append(_t)
+            l.append(sum(_l) / len(_l))
+            p.append(_p)
+            r.append(sum(_r) / len(_r))
+            s.append(sum(_s) / len(_s))
+        avgt /= (expNumber+1)
+        avgl /= (expNumber+1)
+        avgp /= (expNumber+1)
+        avgr /= (expNumber+1)
+        avgs /= (expNumber+1)
+        avgThroughputList.append(avgt)
+        avgLatencyList.append(avgl)
+        avgPacketLossList.append(avgp)
+        avgRssiList.append(avgr)
+        avgSnrList.append(avgs)
+        ThroughputList.append(t)
+        LatencyList.append(l)
+        PacketLossList.append(p)
+        RssiList.append(r)
+        SnrList.append(s)
+
+    colors = ["blue", "red", "green", 'purple', 'brown']
+    labels = ["0", "600", "1200", "1800", "2400"]
+    x = [0, 300, 600, 1200, 2400]
+    z= [4000] * len(avgThroughputList)
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
+    # Throughput
+    ThroughputList_err = []
+    for i in range(len(ThroughputList)):
+        ThroughputList_err.append(
+            1.96*np.std(ThroughputList[i]) / np.sqrt(len(ThroughputList[i])))
+    # sem = np.std(ThroughputList) / np.sqrt(len(ThroughputList))
+    # z_score = 1.96
+    # ThroughputList_err = z_score * sem
+
+    plt.errorbar(x, avgThroughputList, yerr = ThroughputList_err, linewidth=20)
+    plt.scatter(x, avgThroughputList,s = z, marker="o")
+
+    x_major_locator = ticker.MultipleLocator(600)    
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(2)
+    axes.yaxis.set_major_locator(y_major_locator)
+    # sns.pointplot(x = np.arange(0, 5), y = ThroughputList, errorbar=('ci', 95), scale=2, dodge=1, join=True)
+    plt.xlabel("Water (ml)", fontsize=my_fontsize)
+    plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(-100, 2600)
+    plt.ylim(0, 8.0)
+    plt.tight_layout()
+    plt.savefig(figFolder + "throughput_moisture_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_moisture_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Latency
+    LatencyList_err = []
+    for i in range(len(LatencyList)):
+        LatencyList_err.append(
+            1.96*np.std(LatencyList[i]) / np.sqrt(len(LatencyList[i])))
+    # sem = np.std(LatencyList) / np.sqrt(len(LatencyList))
+    # z_score = 1.96
+    # LatencyList_err = z_score * sem
+    plt.errorbar(x, avgLatencyList, yerr = LatencyList_err, linewidth=20)
+    plt.scatter(x, avgLatencyList, s=z, marker="o")
+
+    x_major_locator = ticker.MultipleLocator(600)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    # y_major_locator = ticker.MultipleLocator(0.1)
+    # axes.yaxis.set_major_locator(y_major_locator)
+    plt.xlabel("Water (ml)", fontsize=my_fontsize)
+    plt.ylabel("Latency (ms)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(-100, 2600)
+    plt.ylim(0, 66)
+    plt.tight_layout()
+    plt.savefig(figFolder + "latency_moisture_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "latency_moisture_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # PacketLoss
+    PacketLossList_err = []
+    for i in range(len(PacketLossList)):
+        PacketLossList_err.append(
+            1.96*np.std(PacketLossList[i]) / np.sqrt(len(PacketLossList[i])))
+    # sem = np.std(PacketLossList) / np.sqrt(len(PacketLossList))
+    # z_score = 1.96
+    # PacketLossList_err = z_score * sem
+    plt.errorbar(x, avgPacketLossList, yerr = PacketLossList_err, linewidth=20)
+    plt.scatter(x, avgPacketLossList, s=z, marker="o")
+    plt.ylim(bottom=0)
+    x_major_locator = ticker.MultipleLocator(600)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Water (ml)", fontsize=my_fontsize)
+    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(-100, 2600)
+    plt.tight_layout()
+    plt.savefig(figFolder + "packetLoss_moisture_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "packetLoss_moisture_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Rssi
+    RssiList_err = []
+    for i in range(len(RssiList)):
+        RssiList_err.append(
+            1.96*np.std(RssiList[i]) / np.sqrt(len(RssiList[i])))
+    # sem = np.std(RssiList) / np.sqrt(len(RssiList))
+    # z_score = 1.96
+    # RssiList_err = z_score * sem
+    plt.errorbar(x, avgRssiList, yerr = RssiList_err, linewidth=20)
+    plt.scatter(x, avgRssiList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(600)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Water (ml)", fontsize=my_fontsize)
+    plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(-100, 2600)
+    plt.tight_layout()
+    plt.savefig(figFolder + "rssi_moisture_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rssi_moisture_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    SnrList_err = []
+    for i in range(len(SnrList)):
+        SnrList_err.append(
+            1.96*np.std(SnrList[i]) / np.sqrt(len(SnrList[i])))
+    # sem = np.std(SnrList) / np.sqrt(len(SnrList))
+    # z_score = 1.96
+    # SnrList_err = z_score * sem
+    plt.errorbar(x, avgSnrList, yerr = SnrList_err, linewidth=20)
+    plt.scatter(x, avgSnrList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(600)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(2)
+    axes.yaxis.set_major_locator(y_major_locator)
+    plt.xlabel("Water (ml)", fontsize=my_fontsize)
+    plt.ylabel("SNR (dB)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(fontsize=my_fontsize)
+    # plt.yticks(plt.yticks()[0], [f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    plt.xlim(-100, 2600)
+    plt.ylim(50)
+    plt.tight_layout()
+    plt.savefig(figFolder + "snr_moisture_lora.svg", dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "snr_moisture_lora.eps", dpi=300, bbox_inches="tight")
+    plt.clf()
+
+
+def draw_depth_line(expNumber):
+    ThroughputList = []
+    LatencyList = []
+    PacketLossList = []
+    RssiList = []
+    SnrList = []
+    avgThroughputList = []
+    avgLatencyList = []
+    avgPacketLossList = []
+    avgRssiList = []
+    avgSnrList = []
+    for i in range(len(logFolderNames)):
+        folderName = logFolderNames[i]
+        avgt = 0
+        avgl = 0
+        avgp = 0
+        avgr = 0
+        avgs = 0
+        t = []
+        l = []
+        p = []
+        r = []
+        s = []
+        for j in range(expNumber+1):
+            _t, _l, _p, _r, _s = cal_metric(open(folderName + senderLogFileName + "_" + str(
+                j) + ".log", "r"), open(folderName + receiverLogFileName + "_" + str(j) + ".log", "r"))
+            avgt += _t
+            avgl += sum(_l) / len(_l)
+            avgp += _p
+            avgr += sum(_r) / len(_r)
+            avgs += sum(_s) / len(_s)
+            t.append(_t)
+            l.append(sum(_l) / len(_l))
+            p.append(_p)
+            r.append(sum(_r) / len(_r))
+            s.append(sum(_s) / len(_s))
+        avgt /= (expNumber+1)
+        avgl /= (expNumber+1)
+        avgp /= (expNumber+1)
+        avgr /= (expNumber+1)
+        avgs /= (expNumber+1)
+        avgThroughputList.append(avgt)
+        avgLatencyList.append(avgl)
+        avgPacketLossList.append(avgp)
+        avgRssiList.append(avgr)
+        avgSnrList.append(avgs)
+        ThroughputList.append(t)
+        LatencyList.append(l)
+        PacketLossList.append(p)
+        RssiList.append(r)
+        SnrList.append(s)
+
+    colors = ["blue", "red", "green", 'purple', 'brown']
+    labels = ["20", "30","40"]
+    x = [20, 30, 40]
+    z= [4000]*len(avgThroughputList)
+    plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
+    plt.rcParams['font.family'] = 'DeJavu Serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
+    # Throughput
+    ThroughputList_err = []
+    for i in range(len(ThroughputList)):
+        ThroughputList_err.append(
+            1.96*np.std(ThroughputList[i]) / np.sqrt(len(ThroughputList[i])))
+    # sem = np.std(ThroughputList) / np.sqrt(len(ThroughputList))
+    # z_score = 1.96
+    # ThroughputList_err = z_score * sem
+    plt.errorbar(x, avgThroughputList,  linewidth=20)
+    plt.scatter(x, avgThroughputList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(10)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(0.1)
+    axes.yaxis.set_major_locator(y_major_locator)
+    # sns.pointplot(x = np.arange(0, 5), y = ThroughputList, errorbar=('ci', 95), scale=2, dodge=1, join=True)
+    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [
+               f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    # plt.xlim(-100, 2600)
+    plt.xlim(0, 50)
+    plt.tight_layout()
+    plt.savefig(figFolder + "throughput_depth_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "throughput_depth_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Latency
+    LatencyList_err = []
+    for i in range(len(LatencyList)):
+        LatencyList_err.append(
+            1.96*np.std(LatencyList[i]) / np.sqrt(len(LatencyList[i])))
+    # sem = np.std(LatencyList) / np.sqrt(len(LatencyList))
+    # z_score = 1.96
+    # LatencyList_err = z_score * sem
+    plt.errorbar(x, avgLatencyList, linewidth=20)
+    plt.scatter(x, avgLatencyList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(10)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    plt.ylabel("Latency (ms)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [
+               f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    # plt.xlim(-100, 2600)
+    plt.tight_layout()
+    plt.xlim(0, 50)
+    plt.savefig(figFolder + "latency_depth_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "latency_depth_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # PacketLoss
+    PacketLossList_err = []
+    for i in range(len(PacketLossList)):
+        PacketLossList_err.append(
+            1.96*np.std(PacketLossList[i]) / np.sqrt(len(PacketLossList[i])))
+    # sem = np.std(PacketLossList) / np.sqrt(len(PacketLossList))
+    # z_score = 1.96
+    # PacketLossList_err = z_score * sem
+    plt.errorbar(x, avgPacketLossList,  linewidth=20)
+    plt.scatter(x, avgPacketLossList, s=z, marker="o")
+    plt.ylim(bottom=0)
+    x_major_locator = ticker.MultipleLocator(10)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(0.5)
+    axes.yaxis.set_major_locator(y_major_locator)
+    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [
+               f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    # plt.xlim(-100, 2600)
+    plt.xlim(0, 50)
+    plt.ylim(0.0)
+    plt.tight_layout()
+    plt.savefig(figFolder + "packetLoss_depth_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "packetLoss_depth_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    # Rssi
+    RssiList_err = []
+    for i in range(len(RssiList)):
+        RssiList_err.append(
+            1.96*np.std(RssiList[i]) / np.sqrt(len(RssiList[i])))
+    # sem = np.std(RssiList) / np.sqrt(len(RssiList))
+    # z_score = 1.96
+    # RssiList_err = z_score * sem
+    plt.errorbar(x, avgRssiList,  linewidth=20)
+    plt.scatter(x, avgRssiList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(10)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [
+               f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    # plt.xlim(-100, 2600)
+    plt.xlim(0, 50)
+    plt.tight_layout()
+    plt.savefig(figFolder + "rssi_depth_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "rssi_depth_lora.eps",
+                dpi=300, bbox_inches="tight")
+    plt.clf()
+
+    SnrList_err = []
+    for i in range(len(SnrList)):
+        SnrList_err.append(
+            1.96*np.std(SnrList[i]) / np.sqrt(len(SnrList[i])))
+    # sem = np.std(SnrList) / np.sqrt(len(SnrList))
+    # z_score = 1.96
+    # SnrList_err = z_score * sem
+    plt.errorbar(x, avgSnrList,  linewidth=20)
+    plt.scatter(x, avgSnrList, s=z, marker="o")
+    x_major_locator = ticker.MultipleLocator(10)
+    axes = plt.gca()
+    axes.xaxis.set_major_locator(x_major_locator)
+    y_major_locator = ticker.MultipleLocator(0.1)
+    axes.yaxis.set_major_locator(y_major_locator)
+    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    plt.ylabel("SNR (dB)", fontsize=my_fontsize)
+    # plt.xscale('function', functions=(partial(np.power, 2.0), np.log2))
+    plt.xticks(fontsize=my_fontsize)
+    plt.yticks(plt.yticks()[0], [
+               f'{x:.1f}' for x in plt.yticks()[0]], fontsize=my_fontsize)
+    # plt.xlim(-100, 2600)
+    plt.xlim(0, 50)
+    plt.tight_layout()
+    plt.savefig(figFolder + "snr_depth_lora.svg",
+                dpi=300, bbox_inches="tight")
+    plt.savefig(figFolder + "snr_depth_lora.eps",
                 dpi=300, bbox_inches="tight")
     plt.clf()
 
@@ -434,4 +1059,6 @@ if __name__ == "__main__":
     parser.add_argument("--expNumber", type=int, default=0)
     args = parser.parse_args()
     
-    draw_compare_line(args.expNumber)
+    # draw_moisture_line(args.expNumber)
+    # draw_distance_line(args.expNumber)
+    draw_depth_line(args.expNumber)

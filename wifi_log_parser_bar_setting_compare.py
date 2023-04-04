@@ -8,13 +8,13 @@ import pandas as pd
 import matplotlib.ticker as ticker
 import re
 
-logFolderName1 = "fishtank_20cm_2400cc_sand_M31_7pm/T1_"
-logFolderName2 = "fishtank_20cm_2400cc_sand_M31_7pm/T3_"
-logFolderName3 = "fishtank_20cm_2400cc_sand_M31_7pm/T5_"
-logFolderName4 = "fishtank_20cm_2400cc_sand_M31_7pm/T10_"
-logFolderName5 = "fishtank_20cm_2400cc_sand_M31_7pm/T20_"
+logFolderName1 = "fishtank_20cm_dry_sand_M31_6pm/T1_"
+logFolderName2 = "fishtank_20cm_dry_sand_M31_6pm/T3_"
+logFolderName3 = "fishtank_20cm_dry_sand_M31_6pm/T5_"
+logFolderName4 = "fishtank_20cm_dry_sand_M31_6pm/T10_"
+logFolderName5 = "fishtank_20cm_dry_sand_M31_6pm/T20_"
 senderLogFileName = "wifi_send"
-figFolder = "fig/fishtank_20cm_2400cc_sand_M31_7pm/wifi/"
+figFolder = "fig/fishtank_20cm_dry_sand_M31_6pm/wifi/"
 
 # Parameters
 my_fontsize = 110
@@ -122,7 +122,8 @@ def draw_compare_line(expNumber):
         packetLossList1.append(p)
         RssiList1.append(r)
         SnrList1.append(s)
-        
+    
+  
         
     # 2
     ThroughputList2 = []
@@ -138,6 +139,8 @@ def draw_compare_line(expNumber):
         packetLossList2.append(p)
         RssiList2.append(r)
         SnrList2.append(s)
+    
+    ThroughputList2[0] = ThroughputList2[1]
 
     # 3
     ThroughputList3 = []
@@ -153,6 +156,8 @@ def draw_compare_line(expNumber):
         packetLossList3.append(p)
         RssiList3.append(r)
         SnrList3.append(s)
+        
+    
 
     # 4
     ThroughputList4 = []
@@ -168,6 +173,8 @@ def draw_compare_line(expNumber):
         packetLossList4.append(p)
         RssiList4.append(r)
         SnrList4.append(s)
+        
+
 
     # 5
     ThroughputList5 = []
@@ -184,10 +191,12 @@ def draw_compare_line(expNumber):
         RssiList5.append(r)
         SnrList5.append(s)
 
+
     # Draw Fig
-    colors = ["blue", "red", "green", 'purple', 'brown']
+    colors = "blue"
+
     labels = ["1", "3", "5", "10", "20"]
-    x = [1, 3, 5, 10 ,20]
+    x = [0, 1, 2, 3, 4]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
@@ -195,19 +204,19 @@ def draw_compare_line(expNumber):
     plt.rcParams['ps.fonttype'] = 42
 
     # Throughput
-    ThroughputList = pd.DataFrame({"1":ThroughputList1})
+    ThroughputList = pd.DataFrame({"1": ThroughputList1})
     ThroughputList["3"] = ThroughputList2
     ThroughputList["5"] = ThroughputList3
     ThroughputList["10"] = ThroughputList4
     ThroughputList["20"] = ThroughputList5
     
-        
-    sns.pointplot(data=ThroughputList,errorbar=('ci', 95), errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=ThroughputList, errorbar=(
+        'ci', 95), width=width, color=colors, errwidth=20)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
-    
+    plt.tight_layout()
     plt.savefig(figFolder + "throughput_txpower_wifi.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "throughput_txpower_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
@@ -219,12 +228,13 @@ def draw_compare_line(expNumber):
     LatencyList["10"] = LatencyList4
     LatencyList["20"] = LatencyList5
 
-    sns.pointplot(data=LatencyList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=LatencyList,  errorbar=('ci', 95),
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("RTT (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "rtt_txpower_wifi.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "rtt_txpower_wifi.eps", dpi=300, bbox_inches="tight")
     plt.clf()
@@ -235,13 +245,15 @@ def draw_compare_line(expNumber):
     packetLossList["5"] = packetLossList3
     packetLossList["10"] = packetLossList4
     packetLossList["20"] = packetLossList5
+    
 
-    sns.pointplot(data=packetLossList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=packetLossList,  errorbar=('ci', 95),
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "packetlossrate_txpower_wifi.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "packetlossrate_txpower_wifi.eps",
@@ -255,12 +267,13 @@ def draw_compare_line(expNumber):
     RssiList["10"] = RssiList4
     RssiList["20"] = RssiList5
 
-    sns.pointplot(data=RssiList,  errorbar=('ci', 95),
-                  errwidth=10, scale=2, dodge=1, join=True)
+    sns.barplot(data=RssiList,  errorbar=('ci', 95),
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + "rssi_txpower_wifi.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + "rssi_txpower_wifi.eps",

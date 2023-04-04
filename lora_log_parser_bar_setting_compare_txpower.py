@@ -209,7 +209,7 @@ def draw_compare_line(expNumber):
     SnrList3['Avg'] = (SnrList3[0] + SnrList3[1] + SnrList3[2] ) /3
     
     # Draw Fig
-    colors = ["blue", "red", "green", 'purple', 'brown']
+    colors = "blue"
     labels = ["1", "3", "15"]
     x = [0,1,2]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
@@ -223,11 +223,13 @@ def draw_compare_line(expNumber):
     ThroughputList["2"] = ThroughputList2["Avg"]
     ThroughputList["4"] = ThroughputList3["Avg"]
         
-    sns.barplot(data=ThroughputList,  errorbar=('ci', 95), errwidth=10, width=width)
+    sns.barplot(data=ThroughputList,  errorbar=('ci', 95),
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + compare +  "throughput_txpower_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + compare + "throughput_txpower_lora.eps",
                 dpi=300, bbox_inches="tight")
@@ -237,14 +239,17 @@ def draw_compare_line(expNumber):
     LatencyList = pd.DataFrame({"1": LatencyList1["Avg"]})
     LatencyList["2"] = LatencyList2["Avg"]
     LatencyList["4"] = LatencyList3["Avg"]
+    
+
 
 
     sns.barplot(data=LatencyList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + compare + "latency_txpower_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + compare + "latency_txpower_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
@@ -256,11 +261,12 @@ def draw_compare_line(expNumber):
 
 
     sns.barplot(data=packetLossList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + compare + "packetlossrate_txpower_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + compare + "packetlossrate_txpower_lora.eps",
@@ -274,11 +280,12 @@ def draw_compare_line(expNumber):
 
 
     sns.barplot(data=RssiList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
+                errwidth=20, width=width, color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + compare + "rssi_txpower_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + compare + "rssi_txpower_lora.eps",
@@ -292,11 +299,12 @@ def draw_compare_line(expNumber):
 
 
     sns.barplot(data=SnrList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
+                errwidth=20, width=width,color=colors)
     plt.xlabel("TX Power (dBm)", fontsize=my_fontsize)
     plt.ylabel("SNR (dB)", fontsize=my_fontsize)
     plt.xticks(x, labels, fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.tight_layout()
     plt.savefig(figFolder + compare + "snr_txpower_lora.svg",
                 dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + compare + "snr_txpower_lora.eps",

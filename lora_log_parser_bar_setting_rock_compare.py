@@ -119,6 +119,9 @@ def draw_compare_line(expNumber):
         RssiList1.append(r)
         SnrList1.append(s)
         
+    print(ThroughputList1)
+    print(LatencyList1)
+        
     ThroughputList1 = pd.DataFrame(ThroughputList1)
     ThroughputList1 = ThroughputList1.T
 
@@ -211,8 +214,8 @@ def draw_compare_line(expNumber):
     
     # Draw Fig
     colors = ["blue", "red", "green", 'purple', 'brown']
-    labels = ["20", "30", "40"]
-    x = [0,1,2,]
+    # labels = ["20", "30", "40"]
+    x = [0,20,30, 40]
     plt.figure(figsize=my_figsize, dpi=100, linewidth=1)
     plt.rcParams['font.family'] = 'DeJavu Serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
@@ -220,88 +223,93 @@ def draw_compare_line(expNumber):
     plt.rcParams['ps.fonttype'] = 42
 
     # Throughput
-    ThroughputList = pd.DataFrame({"20":ThroughputList1[0]})
-    ThroughputList["30"] = ThroughputList2[0]
-    ThroughputList["40"] = ThroughputList3[0]
+    ThroughputList = []
+    ThroughputList.append(ThroughputList1[0])
+    ThroughputList.append(ThroughputList2[0])
+    ThroughputList.append(ThroughputList3[0])
+    
+    labels = ["20", "30", "40"]
 
-        
-    sns.barplot(data=ThroughputList,  errorbar=('ci', 95), errwidth=10, width=width)
+    for i in range(3):
+        plt.plot(data=ThroughputList[i],  errorbar=('ci', 95))
     plt.xlabel("Depth (cm)", fontsize=my_fontsize)
     plt.ylabel("Throughput (kbps)", fontsize=my_fontsize)
-    plt.xticks(x, labels, fontsize=my_fontsize)
+    plt.xticks(x,  fontsize=my_fontsize)
     plt.yticks(fontsize=my_fontsize)
+    plt.legend(labels, loc="upper center", fancybox=False, labelspacing=0.05, handletextpad=0.5, ncol=4, borderpad=0.25,
+               title="", framealpha=1, columnspacing=0.2, fontsize=my_fontsize, bbox_to_anchor=(0.5, 1.19))
     plt.savefig(figFolder + compare +  "throughput_depth_lora.svg", dpi=300, bbox_inches="tight")
     plt.savefig(figFolder + compare + "throughput_depth_lora.eps", dpi=300, bbox_inches="tight")
     plt.clf()
     
-    # Latency
-    LatencyList = pd.DataFrame({"20": LatencyList1[0]})
-    LatencyList["30"] = LatencyList2[0]
-    LatencyList["40"] = LatencyList3[0]
+    # # Latency
+    # LatencyList = pd.DataFrame({"20": LatencyList1[0]})
+    # LatencyList["30"] = LatencyList2[0]
+    # LatencyList["40"] = LatencyList3[0]
 
 
 
-    sns.barplot(data=LatencyList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
-    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
-    plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
-    plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + compare + "latency_depth_lora.svg", dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + compare + "latency_depth_lora.eps", dpi=300, bbox_inches="tight")
-    plt.clf()
+    # sns.barplot(data=LatencyList,  errorbar=('ci', 95),
+    #             errwidth=10, width=width)
+    # plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    # plt.ylabel("Latnecy (ms)", fontsize=my_fontsize)
+    # plt.xticks(x, labels, fontsize=my_fontsize)
+    # plt.yticks(fontsize=my_fontsize)
+    # plt.savefig(figFolder + compare + "latency_depth_lora.svg", dpi=300, bbox_inches="tight")
+    # plt.savefig(figFolder + compare + "latency_depth_lora.eps", dpi=300, bbox_inches="tight")
+    # plt.clf()
     
-    # Packet loss rate
-    packetLossList = pd.DataFrame({"20": packetLossList1[0]})
-    packetLossList["30"] = packetLossList2[0]
-    packetLossList["40"] = packetLossList3[0]
+    # # Packet loss rate
+    # packetLossList = pd.DataFrame({"20": packetLossList1[0]})
+    # packetLossList["30"] = packetLossList2[0]
+    # packetLossList["40"] = packetLossList3[0]
 
-    sns.barplot(data=packetLossList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
-    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
-    plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
-    plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + compare + "packetlossrate_depth_lora.svg",
-                dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + compare + "packetlossrate_depth_lora.eps",
-                dpi=300, bbox_inches="tight")
-    plt.clf()
+    # sns.barplot(data=packetLossList,  errorbar=('ci', 95),
+    #             errwidth=10, width=width)
+    # plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    # plt.ylabel("Packet Loss Rate (%)", fontsize=my_fontsize)
+    # plt.xticks(x, labels, fontsize=my_fontsize)
+    # plt.yticks(fontsize=my_fontsize)
+    # plt.savefig(figFolder + compare + "packetlossrate_depth_lora.svg",
+    #             dpi=300, bbox_inches="tight")
+    # plt.savefig(figFolder + compare + "packetlossrate_depth_lora.eps",
+    #             dpi=300, bbox_inches="tight")
+    # plt.clf()
     
-    # RSSI
-    RssiList = pd.DataFrame({"20": RssiList1[0]})
-    RssiList["30"] = RssiList2[0]
-    RssiList["40"] = RssiList3[0]
+    # # RSSI
+    # RssiList = pd.DataFrame({"20": RssiList1[0]})
+    # RssiList["30"] = RssiList2[0]
+    # RssiList["40"] = RssiList3[0]
 
 
-    sns.barplot(data=RssiList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
-    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
-    plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
-    plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + compare + "rssi_depth_lora.svg",
-                dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + compare + "rssi_depth_lora.eps",
-                dpi=300, bbox_inches="tight")
-    plt.clf()
+    # sns.barplot(data=RssiList,  errorbar=('ci', 95),
+    #             errwidth=10, width=width)
+    # plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    # plt.ylabel("RSSI (dBm)", fontsize=my_fontsize)
+    # plt.xticks(x, labels, fontsize=my_fontsize)
+    # plt.yticks(fontsize=my_fontsize)
+    # plt.savefig(figFolder + compare + "rssi_depth_lora.svg",
+    #             dpi=300, bbox_inches="tight")
+    # plt.savefig(figFolder + compare + "rssi_depth_lora.eps",
+    #             dpi=300, bbox_inches="tight")
+    # plt.clf()
     
-    # SNR
-    SnrList = pd.DataFrame({"20": SnrList1[0]})
-    SnrList["30"] = SnrList2[0]
-    SnrList["40"] = SnrList3[0]
+    # # SNR
+    # SnrList = pd.DataFrame({"20": SnrList1[0]})
+    # SnrList["30"] = SnrList2[0]
+    # SnrList["40"] = SnrList3[0]
 
-    sns.barplot(data=SnrList,  errorbar=('ci', 95),
-                errwidth=10, width=width)
-    plt.xlabel("Depth (cm)", fontsize=my_fontsize)
-    plt.ylabel("SNR (dB)", fontsize=my_fontsize)
-    plt.xticks(x, labels, fontsize=my_fontsize)
-    plt.yticks(fontsize=my_fontsize)
-    plt.savefig(figFolder + compare + "snr_depth_lora.svg",
-                dpi=300, bbox_inches="tight")
-    plt.savefig(figFolder + compare + "snr_depth_lora.eps",
-                dpi=300, bbox_inches="tight")
-    plt.clf()
+    # sns.barplot(data=SnrList,  errorbar=('ci', 95),
+    #             errwidth=10, width=width)
+    # plt.xlabel("Depth (cm)", fontsize=my_fontsize)
+    # plt.ylabel("SNR (dB)", fontsize=my_fontsize)
+    # plt.xticks(x, labels, fontsize=my_fontsize)
+    # plt.yticks(fontsize=my_fontsize)
+    # plt.savefig(figFolder + compare + "snr_depth_lora.svg",
+    #             dpi=300, bbox_inches="tight")
+    # plt.savefig(figFolder + compare + "snr_depth_lora.eps",
+    #             dpi=300, bbox_inches="tight")
+    # plt.clf()
 
 if __name__ == "__main__":
     
