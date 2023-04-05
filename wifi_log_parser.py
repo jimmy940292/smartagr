@@ -23,25 +23,23 @@ width = 0.6
 
 
 def parse_log_from_file(senderLogFile):
-    
-    
-    
+
     # Throughput (Mb)
     pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*(\d+.\d+) Mbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+ \([\d]+|[\d+.\d+]%\)"
     throughput = 0.0
     for i, line in enumerate(open(senderLogFile, 'r')):
-        if(re.match(pattern, line)):
+        if (re.match(pattern, line)):
             throughput = float(re.match(pattern, line).group(1))
             throughput *= 1000
             break
-        
+
     # Throughput (Kb)
     pattern = "\[\s*\d\] \d+\.\d+\-\d+\.\d+ sec\s*\d+\.\d+ \wBytes\s*(\d+) Kbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+ \([\d]+|[\d+.\d+]%\)"
     for i, line in enumerate(open(senderLogFile, 'r')):
         if (re.match(pattern, line)):
             throughput = float(re.match(pattern, line).group(1))
             break
-    
+
     # Latency
     pattern = "rtt min/avg/max/mdev = \d+.\d+/(\d+.\d+)/\d+.\d+/\d+.\d+ ms"
     latency = 0.0
@@ -49,7 +47,7 @@ def parse_log_from_file(senderLogFile):
         if (re.match(pattern, line)):
             latency = float(re.match(pattern, line).group(1))
             break
-    
+
     # Packet loss rate (Mb)
     pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*\d+.\d+ Mbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+\s*\((\d+|\d+.\d+)%\)"
     packetlossrate = 0.0
@@ -57,14 +55,14 @@ def parse_log_from_file(senderLogFile):
         if (re.match(pattern, line)):
             packetlossrate = float(re.match(pattern, line).group(1))
             break
-        
+
     # Packet loss rate (Kb)
     pattern = "\[\s*\d\] \d+.\d+-\d+.\d+ sec\s*\d+.\d+ \wBytes\s*\d+.\d+ Kbits\/sec\s*\d+.\d+ ms\s*\d+\/\s*\d+\s*\((\d+|\d+.\d+)%\)"
     for i, line in enumerate(open(senderLogFile, 'r')):
         if (re.match(pattern, line)):
             packetlossrate = float(re.match(pattern, line).group(1))
             break
-    
+
     # RSSI
     pattern = "Signal strength:\s*-(\d+) dBm"
     rssi = 0.0
@@ -72,7 +70,7 @@ def parse_log_from_file(senderLogFile):
         if (re.match(pattern, line)):
             rssi = float(re.match(pattern, line).group(1)) * -1.0
             break
-    
+
     # SNR
     pattern = "SNR:\s*(\d+) dB"
     snr = 0.0
@@ -80,9 +78,19 @@ def parse_log_from_file(senderLogFile):
         if (re.match(pattern, line)):
             snr = float(re.match(pattern, line).group(1))
             break
-        
-        
-    return throughput, latency, packetlossrate, rssi, snr
+
+    # Throughput List
+    throughputList = []
+    pattern1 = "\[ \s*\d+\]\s*\d+\.\d+\-\d+\.\d+\s*\w*\s*(\d+|\d+\.\d+)\s*\w*\s*(\d+|\d+\.\d+)\s*Kbits\/\w*"
+    pattern2 = "\[ \s*\d+\]\s*\d+\.\d+\-\d+\.\d+\s*\w*\s*(\d+|\d+\.\d+)\s*\w*\s*(\d+|\d+\.\d+)\s*Mbits\/\w*"
+    for i, line in enumerate(open(senderLogFile, 'r')):
+        if (re.match(pattern1, line)):
+            throughputList.append(float(re.match(pattern1, line).group(2)))
+        elif (re.match(pattern2, line)):
+            throughputList.append(
+                float(re.match(pattern2, line).group(2))*1000.0)
+
+    return throughputList, latency, packetlossrate, rssi, snr
     
     
 def draw_avg_bar(senderLogFiles):
